@@ -128,45 +128,80 @@ class CallbackHandler(http.server.SimpleHTTPRequestHandler):
         <html>
         <head>
             <title>Authentication Successful</title>
+            <meta name="viewport" content="width=device-width, initial-scale=1.0">
             <style>
+                * {
+                    margin: 0;
+                    padding: 0;
+                    box-sizing: border-box;
+                }
                 body {
-                    font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+                    font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
                     display: flex;
                     justify-content: center;
                     align-items: center;
                     height: 100vh;
                     margin: 0;
-                    background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+                    background: #1a1a1a;
+                    padding: 16px;
                 }
                 .container {
-                    background: white;
+                    background: #242424;
                     padding: 48px;
                     border-radius: 16px;
-                    box-shadow: 0 20px 60px rgba(0,0,0,0.3);
+                    border: 1px solid #3a3a3a;
+                    box-shadow: 0 20px 60px rgba(0,0,0,0.5);
                     text-align: center;
-                    max-width: 400px;
+                    max-width: 480px;
+                    width: 100%;
+                }
+                .icon-container {
+                    margin: 0 auto 24px;
+                    height: 64px;
+                    width: 64px;
+                    background: rgba(16, 185, 129, 0.2);
+                    border-radius: 50%;
+                    display: flex;
+                    align-items: center;
+                    justify-content: center;
+                }
+                .checkmark {
+                    width: 32px;
+                    height: 32px;
+                    stroke: #10b981;
                 }
                 h1 {
-                    color: #10b981;
-                    font-size: 32px;
+                    color: #e5e7eb;
+                    font-size: 24px;
+                    font-weight: 700;
                     margin-bottom: 16px;
                 }
                 p {
-                    color: #64748b;
+                    color: #9ca3af;
                     font-size: 16px;
                     line-height: 1.6;
                 }
-                .checkmark {
-                    font-size: 64px;
-                    margin-bottom: 24px;
+                .footer {
+                    margin-top: 24px;
+                    padding-top: 24px;
+                    border-top: 1px solid #3a3a3a;
+                    color: #6b7280;
+                    font-size: 14px;
                 }
             </style>
         </head>
         <body>
             <div class="container">
-                <div class="checkmark">✅</div>
+                <div class="icon-container">
+                    <svg class="checkmark" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"></path>
+                    </svg>
+                </div>
                 <h1>Authentication Successful!</h1>
                 <p>You can now close this window and return to Fusion 360.</p>
+                <div class="footer">
+                    Your CADZERO add-in is now authenticated and ready to use.
+                </div>
             </div>
         </body>
         </html>

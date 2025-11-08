@@ -179,21 +179,27 @@ function exportChat() {
 function updateDebugSections() {
     // Update tool calls
     const toolCallsContent = document.getElementById('toolCallsContent');
-    toolCallsContent.innerHTML = debugData.toolCalls.map(call => 
-        `<div>${JSON.stringify(call, null, 2)}</div>`
-    ).join('<hr>') || '<div>No tool calls yet</div>';
+    if (toolCallsContent) {
+        toolCallsContent.innerHTML = debugData.toolCalls.map(call => 
+            `<div>${JSON.stringify(call, null, 2)}</div>`
+        ).join('<hr>') || '<div>No tool calls yet</div>';
+    }
     
     // Update execution log
     const executionLogContent = document.getElementById('executionLogContent');
-    executionLogContent.innerHTML = debugData.executionLog.map(log => 
-        `<div>[${log.timestamp}] ${log.message}</div>`
-    ).join('') || '<div>No execution log yet</div>';
+    if (executionLogContent) {
+        executionLogContent.innerHTML = debugData.executionLog.map(log => 
+            `<div>[${log.timestamp}] ${log.message}</div>`
+        ).join('') || '<div>No execution log yet</div>';
+    }
     
     // Update raw data
     const rawDataContent = document.getElementById('rawDataContent');
-    rawDataContent.innerHTML = debugData.rawData.map(data => 
-        `<div>${JSON.stringify(data, null, 2)}</div>`
-    ).join('<hr>') || '<div>No raw data yet</div>';
+    if (rawDataContent) {
+        rawDataContent.innerHTML = debugData.rawData.map(data => 
+            `<div>${JSON.stringify(data, null, 2)}</div>`
+        ).join('<hr>') || '<div>No raw data yet</div>';
+    }
 }
 
 // Add debug log entry
@@ -1037,7 +1043,7 @@ window.fusionJavaScriptHandler = {
                     console.log('Auth complete - signed in:', response.user.user_email);
                     
                     // Show success message briefly
-                    alert('✅ Successfully signed in as ' + (response.user.user_email || 'user'));
+                    // alert('✅ Successfully signed in as ' + (response.user.user_email || 'user'));
                 } else {
                     // Sign-in failed
                     addDebugLog('Sign-in failed: ' + (response.message || 'Unknown error'));
