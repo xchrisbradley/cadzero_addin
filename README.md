@@ -2,6 +2,14 @@
 
 CADZERO is an intelligent add-in for Autodesk Fusion 360 that brings AI-powered CAD assistance directly into your modeling workflow. Create complex designs, automate repetitive tasks, and get instant help with natural language commands.
 
+## 🎬 Demo
+
+![CADZERO Demo](./demo/cadzero-demo.gif)
+
+*Create complex CAD models using natural language - watch CADZERO in action!*
+
+> **Note**: To add your demo video, place a gif file at `./demo/cadzero-demo.gif` or update the path above.
+
 ## ✨ Features
 
 - **Natural Language CAD Modeling** - Describe what you want to create and let AI generate the geometry
