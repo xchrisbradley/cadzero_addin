@@ -15,7 +15,7 @@ DEBUG = True
 # that need a unique name. It's also recommended to use a company name as 
 # part of the ID to better ensure the ID is unique.
 ADDIN_NAME = os.path.basename(os.path.dirname(__file__))
-COMPANY_NAME = 'ACME'
+COMPANY_NAME = 'Nation Developers'
 
 # Palettes
 sample_palette_id = f'{COMPANY_NAME}_{ADDIN_NAME}_palette_id'
@@ -26,3 +26,20 @@ STAGING_ENDPOINT = 'https://staging-utilities-c8p2.encr.app'
 
 # Current endpoint (defaults to local)
 current_endpoint = LOCAL_ENDPOINT
+
+# Clerk Authentication Configuration
+CLERK_PUBLISHABLE_KEY = 'pk_test_dXAtcm9vc3Rlci01Mi5jbGVyay5hY2NvdW50cy5kZXYk'  # Replace with your actual key
+CLERK_SIGN_IN_URL_LOCAL = 'http://localhost:5173/sign-in'  # Your local frontend sign-in URL
+CLERK_SIGN_IN_URL_STAGING = 'https://your-staging-frontend.com/sign-in'  # Your staging frontend sign-in URL
+
+def get_auth_url():
+    """Get the appropriate authentication URL based on current endpoint"""
+    # Add callback URL parameter for local callback server
+    callback_url = 'http://localhost:8765/'
+    
+    if current_endpoint == STAGING_ENDPOINT:
+        base_url = CLERK_SIGN_IN_URL_STAGING
+    else:
+        base_url = CLERK_SIGN_IN_URL_LOCAL
+    
+    return f"{base_url}?redirect_url={callback_url}"

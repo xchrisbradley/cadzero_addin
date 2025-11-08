@@ -12,25 +12,25 @@
             --font-size-base: 14px;
             --font-family-primary: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', 'Roboto', sans-serif;
             --font-family-mono: 'JetBrains Mono', 'SF Mono', 'Monaco', 'Inconsolata', monospace;
-            --color-primary: #3b82f6;
-            --color-primary-dark: #1e40af;
+            --color-primary: #60a5fa;
+            --color-primary-dark: #3b82f6;
             --color-success: #10b981;
             --color-error: #ef4444;
             --color-warning: #f59e0b;
-            --color-text-primary: #f8fafc;
-            --color-text-secondary: #cbd5e1;
-            --color-text-muted: #94a3b8;
-            --color-bg-primary: #0f172a;
-            --color-bg-secondary: #1e293b;
-            --color-bg-tertiary: #334155;
-            --color-border: #475569;
-            --color-border-light: #64748b;
-            --shadow-sm: 0 1px 2px 0 rgb(0 0 0 / 0.05);
-            --shadow-md: 0 4px 6px -1px rgb(0 0 0 / 0.1);
-            --shadow-lg: 0 10px 15px -3px rgb(0 0 0 / 0.1);
+            --color-text-primary: #e5e7eb;
+            --color-text-secondary: #9ca3af;
+            --color-text-muted: #6b7280;
+            --color-bg-primary: #1a1a1a;
+            --color-bg-secondary: #242424;
+            --color-bg-tertiary: #2d2d2d;
+            --color-border: #3a3a3a;
+            --color-border-light: #4a4a4a;
+            --shadow-sm: 0 1px 2px 0 rgb(0 0 0 / 0.3);
+            --shadow-md: 0 4px 6px -1px rgb(0 0 0 / 0.3);
+            --shadow-lg: 0 10px 15px -3px rgb(0 0 0 / 0.3);
             --radius-sm: 6px;
-            --radius-md: 8px;
-            --radius-lg: 12px;
+            --radius-md: 10px;
+            --radius-lg: 16px;
         }
 
         * {
@@ -49,9 +49,10 @@
 
         body {
             font-family: var(--font-family-primary);
-            background: linear-gradient(135deg, var(--color-bg-primary) 0%, #1e293b 50%, #334155 100%);
+            background: var(--color-bg-primary);
             color: var(--color-text-primary);
-            padding: 16px;
+            padding: 0;
+            margin: 0;
             line-height: 1.6;
             font-size: var(--font-size-base);
             display: flex;
@@ -67,157 +68,387 @@
             box-sizing: border-box;
         }
 
-        /* Header */
-        .header {
-            background: var(--color-bg-secondary);
-            border-bottom: 1px solid var(--color-border);
-            padding: 12px 16px;
-            margin-bottom: 12px;
+        .container.not-authenticated {
+            justify-content: center;
+            align-items: center;
+            padding: 20px;
         }
 
-        .header h1 {
-            font-size: 16px;
+        /* Header */
+        .header {
+            background: var(--color-bg-primary);
+            border-bottom: 1px solid var(--color-border);
+            padding: 16px 20px;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            flex-shrink: 0;
+        }
+
+        .header-left {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+
+        .header-icon {
+            width: 20px;
+            height: 20px;
+            background: transparent;
+            border: none;
+            color: var(--color-text-muted);
+            cursor: pointer;
+            padding: 0;
+            transition: all 0.2s ease;
+        }
+
+        .header-icon:hover {
+            color: var(--color-error);
+            transform: scale(1.1);
+        }
+
+        .header-icon svg {
+            width: 20px;
+            height: 20px;
+        }
+
+        .header-user-info {
+            display: flex;
+            flex-direction: column;
+            gap: 2px;
+        }
+
+        .header-user-name {
+            font-size: 14px;
             font-weight: 600;
             color: var(--color-text-primary);
             margin: 0;
+            line-height: 1.2;
         }
 
-        /* Compact Settings */
-        .settings-bar {
+        .header-user-email {
+            font-size: 11px;
+            font-weight: 400;
+            color: var(--color-text-muted);
+            margin: 0;
+            line-height: 1.2;
+        }
+
+        .header-right {
             display: flex;
             align-items: center;
-            gap: 8px;
-            margin-bottom: 8px;
-            padding: 8px 0;
-            border-bottom: 1px solid var(--color-border);
+            gap: 12px;
         }
 
-        .settings-btn {
-            background: var(--color-bg-tertiary);
-            border: 1px solid var(--color-border);
+        .header-btn {
+            background: transparent;
+            border: none;
             color: var(--color-text-secondary);
-            padding: 4px 8px;
-            border-radius: var(--radius-sm);
             cursor: pointer;
-            font-size: 11px;
+            padding: 6px;
+            border-radius: var(--radius-sm);
             transition: all 0.2s ease;
-            white-space: nowrap;
+            display: flex;
+            align-items: center;
+            justify-content: center;
         }
 
-        .settings-btn:hover {
-            background: var(--color-bg-primary);
+        .header-btn:hover {
+            background: var(--color-bg-secondary);
             color: var(--color-text-primary);
-            border-color: var(--color-primary);
         }
 
-        .settings-btn.active {
-            background: var(--color-primary);
+        .header-btn svg {
+            width: 18px;
+            height: 18px;
+        }
+
+        /* User Prompt Section */
+        .user-prompt-section {
+            padding: 20px 20px 16px;
+            flex-shrink: 0;
+        }
+
+        .user-prompt-section.hidden {
+            display: none;
+        }
+
+        .user-label {
+            font-size: 13px;
+            color: var(--color-text-secondary);
+            font-weight: 500;
+            margin-bottom: 12px;
+        }
+
+        .user-query {
+            font-size: 15px;
+            color: var(--color-text-primary);
+            line-height: 1.5;
+            margin-bottom: 16px;
+        }
+
+        .quick-actions {
+            display: flex;
+            gap: 10px;
+            flex-wrap: wrap;
+        }
+
+        .quick-action-btn {
+            background: linear-gradient(135deg, var(--color-primary) 0%, #3b82f6 100%);
+            border: none;
             color: white;
-            border-color: var(--color-primary);
-        }
-
-        .font-size-control {
+            padding: 10px 16px;
+            border-radius: var(--radius-lg);
+            cursor: pointer;
+            font-size: 13px;
+            font-weight: 500;
+            transition: all 0.2s ease;
             display: flex;
             align-items: center;
             gap: 6px;
-            margin-left: auto;
         }
 
-        .font-size-slider {
-            width: 60px;
-            height: 3px;
+        .quick-action-btn:hover {
+            transform: translateY(-1px);
+            box-shadow: 0 4px 12px rgba(96, 165, 250, 0.4);
+        }
+
+        .quick-action-btn.secondary {
             background: var(--color-bg-tertiary);
-            border-radius: 2px;
-            outline: none;
-            appearance: none;
+            color: var(--color-text-secondary);
         }
 
-        .font-size-slider::-webkit-slider-thumb {
-            appearance: none;
-            width: 12px;
-            height: 12px;
-            background: var(--color-primary);
-            border-radius: 50%;
-            cursor: pointer;
+        .quick-action-btn.secondary:hover {
+            background: var(--color-bg-secondary);
+            color: var(--color-text-primary);
+            box-shadow: none;
         }
 
-        .font-size-value {
-            font-size: 11px;
-            color: var(--color-text-muted);
-            min-width: 25px;
-            text-align: center;
-        }
-
-        /* Endpoint Toggle Switch */
-        .endpoint-toggle {
+        /* Status Bar */
+        .status-bar {
+            padding: 12px 20px;
+            border-bottom: 1px solid var(--color-border);
             display: flex;
             align-items: center;
             gap: 8px;
-            margin-left: 8px;
+            font-size: 13px;
+            color: var(--color-text-secondary);
+            flex-shrink: 0;
         }
 
-        .endpoint-label {
-            font-size: 11px;
+        .status-bar.hidden {
+            display: none;
+        }
+
+        .status-model {
             color: var(--color-text-secondary);
             font-weight: 500;
         }
 
-        .toggle-switch {
-            position: relative;
-            display: inline-block;
-            width: 40px;
-            height: 20px;
+        .status-divider {
+            color: var(--color-border);
         }
 
-        .toggle-switch input {
-            opacity: 0;
-            width: 0;
-            height: 0;
-        }
-
-        .toggle-slider {
-            position: absolute;
-            cursor: pointer;
-            top: 0;
-            left: 0;
-            right: 0;
-            bottom: 0;
-            background-color: var(--color-bg-tertiary);
-            border: 1px solid var(--color-border);
-            transition: .3s;
-            border-radius: 20px;
-        }
-
-        .toggle-slider:before {
-            position: absolute;
-            content: "";
-            height: 14px;
-            width: 14px;
-            left: 2px;
-            bottom: 2px;
-            background-color: var(--color-text-secondary);
-            transition: .3s;
-            border-radius: 50%;
-        }
-
-        input:checked + .toggle-slider {
-            background-color: var(--color-success);
-            border-color: var(--color-success);
-        }
-
-        input:checked + .toggle-slider:before {
-            transform: translateX(20px);
-            background-color: white;
-        }
-
-        .endpoint-status {
-            font-size: 10px;
+        .status-time {
             color: var(--color-text-muted);
-            min-width: 50px;
         }
 
-        input:checked ~ .endpoint-status {
-            color: var(--color-success);
+        /* Thinking Box */
+        .thinking-box {
+            margin: 0 20px 16px;
+            padding: 14px 16px;
+            background: var(--color-bg-secondary);
+            border: 1px solid var(--color-border);
+            border-radius: var(--radius-md);
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            flex-shrink: 0;
+        }
+
+        .thinking-box.hidden {
+            display: none;
+        }
+
+        .thinking-content {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+
+        .thinking-icon {
+            width: 16px;
+            height: 2px;
+            background: var(--color-text-muted);
+            border-radius: 1px;
+        }
+
+        .thinking-text {
+            color: var(--color-text-secondary);
+            font-size: 13px;
+        }
+
+        .thinking-chevron {
+            color: var(--color-text-muted);
+            font-size: 12px;
+            cursor: pointer;
+            padding: 4px;
+        }
+
+        /* Auth Section */
+        .auth-section {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            padding: 8px 12px;
+            background: var(--color-bg-secondary);
+            border-bottom: 1px solid var(--color-border);
+            transition: all 0.3s ease;
+        }
+
+        .auth-section.authenticated {
+            padding: 6px 12px;
+        }
+
+        .auth-section.not-authenticated {
+            padding: 48px 32px;
+            flex-direction: column;
+            gap: 24px;
+            background: var(--color-bg-primary);
+            border-radius: var(--radius-lg);
+            margin: auto;
+            max-width: 480px;
+            border: 1px solid var(--color-border);
+            align-items: center;
+            justify-content: center;
+        }
+
+        .auth-status {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+
+        .auth-avatar {
+            width: 28px;
+            height: 28px;
+            border-radius: 50%;
+            background: linear-gradient(135deg, var(--color-primary) 0%, var(--color-success) 100%);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 12px;
+            font-weight: 600;
+            color: white;
+            flex-shrink: 0;
+        }
+
+        .auth-info {
+            display: flex;
+            flex-direction: column;
+            min-width: 0;
+            flex: 1;
+        }
+
+        .auth-name {
+            font-size: 13px;
+            font-weight: 600;
+            color: var(--color-text-primary);
+            white-space: nowrap;
+            overflow: hidden;
+            text-overflow: ellipsis;
+        }
+
+        .auth-email {
+            font-size: 11px;
+            color: var(--color-text-muted);
+            white-space: nowrap;
+            overflow: hidden;
+            text-overflow: ellipsis;
+        }
+
+        .auth-btn {
+            background: var(--color-primary);
+            border: 1px solid var(--color-primary);
+            color: white;
+            padding: 8px 20px;
+            border-radius: var(--radius-md);
+            cursor: pointer;
+            font-size: 13px;
+            font-weight: 600;
+            transition: all 0.2s ease;
+            white-space: nowrap;
+        }
+
+        .auth-section.not-authenticated .auth-btn {
+            width: 100%;
+            padding: 14px 32px;
+            font-size: 15px;
+            box-shadow: var(--shadow-md);
+        }
+
+        .auth-btn:hover {
+            background: var(--color-primary-dark);
+            border-color: var(--color-primary-dark);
+            transform: translateY(-1px);
+            box-shadow: var(--shadow-md);
+        }
+
+        .auth-btn.sign-out {
+            background: transparent;
+            border-color: var(--color-border);
+            color: var(--color-text-secondary);
+            padding: 6px 12px;
+            font-size: 11px;
+        }
+
+        .auth-btn.sign-out:hover {
+            background: var(--color-error);
+            border-color: var(--color-error);
+            color: white;
+        }
+
+        .auth-indicator {
+            display: inline-block;
+            width: 6px;
+            height: 6px;
+            border-radius: 50%;
+            background: var(--color-success);
+            margin-right: 6px;
+            animation: pulse 2s infinite;
+            flex-shrink: 0;
+        }
+
+        .auth-indicator.not-authenticated {
+            background: var(--color-error);
+            animation: none;
+        }
+
+        @keyframes pulse {
+            0%, 100% {
+                opacity: 1;
+            }
+            50% {
+                opacity: 0.5;
+            }
+        }
+
+        .auth-welcome {
+            text-align: center;
+            width: 100%;
+        }
+
+        .auth-welcome-title {
+            font-size: 20px;
+            font-weight: 600;
+            color: var(--color-text-primary);
+            margin-bottom: 8px;
+        }
+
+        .auth-welcome-subtitle {
+            font-size: 14px;
+            color: var(--color-text-secondary);
+            line-height: 1.5;
         }
 
         /* Loading indicator styles */
@@ -258,163 +489,160 @@
             }
         }
 
-        /* Input Section */
-        .input-section {
-            margin-bottom: 16px;
-            flex-shrink: 0;
+        /* Content Area */
+        .content-area {
+            flex: 1;
+            overflow-y: auto;
+            padding: 20px;
+            min-height: 0;
         }
 
-        .input-label {
-            font-size: 14px;
-            color: var(--color-text-primary);
-            margin-bottom: 8px;
-            font-weight: 500;
+        .content-area.hidden {
+            display: none;
+        }
+
+        /* Input Section */
+        .input-section {
+            padding: 16px 20px 20px;
+            flex-shrink: 0;
+            border-top: 1px solid var(--color-border);
+        }
+
+        .input-section.hidden {
+            display: none;
         }
 
         .input-container {
             display: flex;
+            align-items: center;
             gap: 8px;
-            align-items: stretch;
+            background: var(--color-bg-secondary);
+            border: 1px solid var(--color-border);
+            border-radius: var(--radius-lg);
+            padding: 4px 8px 4px 16px;
+            transition: all 0.2s ease;
+        }
+
+        .input-container:focus-within {
+            border-color: var(--color-primary);
         }
 
         .input-field {
             flex: 1;
-            background: var(--color-bg-secondary);
-            border: 2px solid var(--color-border);
-            border-radius: var(--radius-md);
+            background: transparent;
+            border: none;
             color: var(--color-text-primary);
-            padding: 12px 16px;
+            padding: 10px 0;
             font-family: var(--font-family-primary);
-            font-size: var(--font-size-base);
-            box-sizing: border-box;
-            transition: all 0.3s ease;
-        }
-
-        .input-field:focus {
+            font-size: 14px;
             outline: none;
-            border-color: var(--color-primary);
-            box-shadow: 0 0 0 3px rgba(59, 130, 246, 0.1);
-            background: var(--color-bg-primary);
         }
 
         .input-field::placeholder {
             color: var(--color-text-muted);
         }
 
-        .submit-btn {
-            background: var(--color-primary);
-            border: 2px solid var(--color-primary);
-            color: white;
-            padding: 12px 24px;
-            border-radius: var(--radius-md);
+        .input-field:disabled {
+            cursor: not-allowed;
+            opacity: 0.5;
+        }
+
+        .input-actions {
+            display: flex;
+            align-items: center;
+            gap: 4px;
+        }
+
+        .input-icon-btn {
+            background: transparent;
+            border: none;
+            color: var(--color-text-muted);
             cursor: pointer;
-            font-size: var(--font-size-base);
-            font-weight: 600;
+            padding: 8px;
+            border-radius: var(--radius-sm);
             transition: all 0.2s ease;
-            white-space: nowrap;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            width: 32px;
+            height: 32px;
         }
 
-        .submit-btn:hover {
-            background: var(--color-primary-dark);
-            border-color: var(--color-primary-dark);
-            transform: translateY(-1px);
-            box-shadow: var(--shadow-md);
+        .input-icon-btn:hover {
+            background: var(--color-bg-tertiary);
+            color: var(--color-text-secondary);
         }
 
-        .submit-btn:active {
-            transform: translateY(0);
+        .input-icon-btn svg {
+            width: 18px;
+            height: 18px;
+        }
+
+        .submit-btn {
+            background: transparent;
+            border: none;
+            color: var(--color-text-muted);
+            cursor: pointer;
+            padding: 8px;
+            border-radius: var(--radius-sm);
+            transition: all 0.2s ease;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            width: 32px;
+            height: 32px;
+        }
+
+        .submit-btn:hover:not(:disabled) {
+            background: var(--color-bg-tertiary);
+            color: var(--color-text-primary);
         }
 
         .submit-btn:disabled {
-            background: var(--color-bg-tertiary);
-            border-color: var(--color-border);
-            color: var(--color-text-muted);
+            opacity: 0.3;
             cursor: not-allowed;
-            transform: none;
+        }
+
+        .submit-btn svg {
+            width: 18px;
+            height: 18px;
         }
 
         /* Scrollbars */
         ::-webkit-scrollbar {
-            width: 8px;
+            width: 6px;
+            height: 6px;
         }
 
         ::-webkit-scrollbar-track {
-            background: var(--color-bg-tertiary);
-            border-radius: 4px;
+            background: transparent;
         }
 
         ::-webkit-scrollbar-thumb {
-            background: var(--color-primary);
-            border-radius: 4px;
-            box-shadow: var(--shadow-sm);
+            background: var(--color-border);
+            border-radius: 3px;
         }
 
         ::-webkit-scrollbar-thumb:hover {
-            background: var(--color-primary-dark);
+            background: var(--color-border-light);
         }
 
-        /* Chat Interface */
-        .chat-container {
-            background: var(--color-bg-secondary);
-            border: 1px solid var(--color-border);
-            border-radius: var(--radius-md);
-            margin-bottom: 12px;
-            flex: 1;
-            min-height: 0;
-            display: flex;
-            flex-direction: column;
-            overflow: hidden;
-        }
-
-        .chat-header {
-            background: var(--color-bg-tertiary);
-            padding: 12px 16px;
-            border-bottom: 1px solid var(--color-border);
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-        }
-
-        .chat-title {
-            font-size: 14px;
-            font-weight: 600;
-            color: var(--color-text-primary);
-        }
-
-        .chat-controls {
-            display: flex;
-            gap: 8px;
-        }
-
-        .chat-btn {
+        ::-webkit-scrollbar-corner {
             background: transparent;
-            border: 1px solid var(--color-border);
-            color: var(--color-text-secondary);
-            padding: 4px 8px;
-            border-radius: var(--radius-sm);
-            cursor: pointer;
-            font-size: 11px;
-            transition: all 0.2s ease;
         }
 
-        .chat-btn:hover {
-            background: var(--color-bg-primary);
-            color: var(--color-text-primary);
-        }
-
+        /* Chat Messages */
         .chat-messages {
-            flex: 1;
-            overflow-y: auto;
-            padding: 16px;
             display: flex;
             flex-direction: column;
-            gap: 12px;
+            gap: 16px;
         }
 
         .message {
             display: flex;
             gap: 12px;
             animation: messageSlideIn 0.3s ease-out;
+            align-items: flex-start;
         }
 
         .message.user {
@@ -422,15 +650,17 @@
         }
 
         .message-avatar {
-            width: 32px;
-            height: 32px;
+            width: 28px;
+            height: 28px;
             border-radius: 50%;
             display: flex;
             align-items: center;
             justify-content: center;
-            font-size: 14px;
+            font-size: 12px;
             font-weight: 600;
             flex-shrink: 0;
+            background: var(--color-bg-tertiary);
+            color: var(--color-text-secondary);
         }
 
         .message.user .message-avatar {
@@ -439,41 +669,30 @@
         }
 
         .message.assistant .message-avatar {
-            background: var(--color-success);
-            color: white;
+            background: var(--color-bg-tertiary);
+            color: var(--color-text-primary);
         }
 
         .message-content {
-            background: var(--color-bg-primary);
-            border: 1px solid var(--color-border);
-            border-radius: var(--radius-md);
-            padding: 12px 16px;
-            max-width: 80%;
+            background: transparent;
+            padding: 0;
+            max-width: calc(100% - 44px);
             word-wrap: break-word;
             position: relative;
         }
 
-        .message.user .message-content {
-            background: var(--color-primary);
-            color: white;
-            border-color: var(--color-primary);
-        }
-
         .message-text {
-            font-size: var(--font-size-base);
-            line-height: 1.5;
+            font-size: 14px;
+            line-height: 1.6;
             margin: 0;
+            color: var(--color-text-primary);
         }
 
         .message-time {
             font-size: 11px;
             color: var(--color-text-muted);
-            margin-top: 4px;
-            opacity: 0.7;
-        }
-
-        .message.user .message-time {
-            color: rgba(255, 255, 255, 0.7);
+            margin-top: 6px;
+            display: block;
         }
 
         @keyframes messageSlideIn {
@@ -500,21 +719,26 @@
 
         /* Debug Sections */
         .debug-section {
+            position: fixed;
+            bottom: 80px;
+            right: 20px;
+            width: 400px;
+            max-height: 300px;
             background: var(--color-bg-secondary);
             border: 1px solid var(--color-border);
             border-radius: var(--radius-md);
-            margin-bottom: 12px;
             overflow: hidden;
-            display: none;
+            box-shadow: var(--shadow-lg);
+            z-index: 1000;
         }
 
-        .debug-section.active {
-            display: block;
+        .debug-section.hidden {
+            display: none;
         }
 
         .debug-header {
             background: var(--color-bg-tertiary);
-            padding: 8px 12px;
+            padding: 10px 14px;
             border-bottom: 1px solid var(--color-border);
             cursor: pointer;
             display: flex;
@@ -525,7 +749,7 @@
         .debug-title {
             font-size: 12px;
             font-weight: 600;
-            color: var(--color-text-secondary);
+            color: var(--color-text-primary);
             text-transform: uppercase;
             letter-spacing: 0.5px;
         }
@@ -536,79 +760,165 @@
             transition: transform 0.2s ease;
         }
 
-        .debug-section.active .debug-toggle {
-            transform: rotate(180deg);
-        }
-
         .debug-content {
-            padding: 12px;
+            padding: 14px;
             font-family: var(--font-family-mono);
             font-size: 11px;
-            color: var(--color-text-muted);
-            max-height: 200px;
+            color: var(--color-text-secondary);
+            max-height: 250px;
             overflow-y: auto;
             background: var(--color-bg-primary);
+            line-height: 1.5;
         }
 
-        /* Example Prompts */
-        .example-prompts {
-            display: flex !important;
-            gap: 10px;
-            margin-bottom: 16px;
-            flex-wrap: wrap;
-            padding: 12px;
-            background: rgba(51, 65, 85, 0.8);
-            border-radius: var(--radius-md);
-            border: 2px solid var(--color-primary);
-            min-height: 60px;
-            flex-shrink: 0;
-            position: relative;
-            z-index: 10;
+        .debug-content div {
+            margin-bottom: 8px;
         }
 
-        .example-prompts:empty {
+        .debug-content hr {
+            border: none;
+            border-top: 1px solid var(--color-border);
+            margin: 8px 0;
+        }
+
+        /* Global hidden class */
+        .hidden {
             display: none !important;
         }
 
-        .example-bubble {
-            flex: 1;
-            min-width: 180px;
-            max-width: 320px;
-            background: linear-gradient(135deg, #3b82f6 0%, #1e40af 100%);
-            border: 2px solid #60a5fa;
-            border-radius: var(--radius-lg);
-            padding: 14px 18px;
-            cursor: pointer;
-            transition: all 0.2s ease;
-            font-size: 13px;
-            font-weight: 600;
-            color: white;
-            white-space: nowrap;
-            overflow: hidden;
-            text-overflow: ellipsis;
-            box-shadow: 0 4px 12px rgba(59, 130, 246, 0.3);
-            display: flex !important;
+        /* Auth Modal */
+        .auth-modal-overlay {
+            position: fixed;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background: rgba(0, 0, 0, 0.8);
+            backdrop-filter: blur(4px);
+            display: flex;
             align-items: center;
             justify-content: center;
-            text-align: center;
+            z-index: 10000;
+            animation: fadeIn 0.2s ease-out;
         }
 
-        .example-bubble:hover {
-            background: linear-gradient(135deg, #10b981 0%, #059669 100%);
-            border-color: #34d399;
-            transform: translateY(-2px) scale(1.02);
-            box-shadow: 0 8px 20px rgba(16, 185, 129, 0.4);
+        @keyframes fadeIn {
+            from { opacity: 0; }
+            to { opacity: 1; }
         }
 
-        .example-bubble:active {
-            transform: translateY(0) scale(0.98);
-            box-shadow: 0 2px 8px rgba(59, 130, 246, 0.3);
+        .auth-modal {
+            background: var(--color-bg-secondary);
+            border: 1px solid var(--color-border);
+            border-radius: var(--radius-lg);
+            padding: 32px;
+            max-width: 500px;
+            width: 90%;
+            box-shadow: 0 20px 60px rgba(0, 0, 0, 0.5);
+            animation: slideUp 0.3s ease-out;
         }
 
-        .example-bubble::before {
-            content: '💡 ';
-            margin-right: 6px;
-            font-size: 16px;
+        @keyframes slideUp {
+            from {
+                opacity: 0;
+                transform: translateY(20px);
+            }
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+
+        .auth-modal-header {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            margin-bottom: 20px;
+        }
+
+        .auth-modal-icon {
+            width: 48px;
+            height: 48px;
+            background: linear-gradient(135deg, var(--color-primary) 0%, #8b5cf6 100%);
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 24px;
+        }
+
+        .auth-modal-title {
+            font-size: 20px;
+            font-weight: 600;
+            color: var(--color-text-primary);
+            margin: 0;
+        }
+
+        .auth-modal-subtitle {
+            color: var(--color-text-secondary);
+            font-size: 14px;
+            margin-bottom: 24px;
+            line-height: 1.5;
+        }
+
+        .auth-modal-link {
+            background: var(--color-bg-primary);
+            border: 1px solid var(--color-border);
+            border-radius: var(--radius-md);
+            padding: 12px 16px;
+            margin-bottom: 16px;
+            font-family: var(--font-family-mono);
+            font-size: 12px;
+            color: var(--color-text-secondary);
+            word-break: break-all;
+            line-height: 1.5;
+        }
+
+        .auth-modal-actions {
+            display: flex;
+            gap: 12px;
+        }
+
+        .auth-modal-btn {
+            flex: 1;
+            padding: 12px 24px;
+            border-radius: var(--radius-md);
+            font-size: 14px;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.2s ease;
+            border: none;
+        }
+
+        .auth-modal-btn.primary {
+            background: linear-gradient(135deg, var(--color-primary) 0%, #3b82f6 100%);
+            color: white;
+        }
+
+        .auth-modal-btn.primary:hover {
+            transform: translateY(-1px);
+            box-shadow: 0 4px 12px rgba(96, 165, 250, 0.4);
+        }
+
+        .auth-modal-btn.secondary {
+            background: var(--color-bg-tertiary);
+            color: var(--color-text-primary);
+            border: 1px solid var(--color-border);
+        }
+
+        .auth-modal-btn.secondary:hover {
+            background: var(--color-bg-primary);
+        }
+
+        .auth-modal-note {
+            margin-top: 16px;
+            padding: 12px;
+            background: var(--color-bg-primary);
+            border-left: 3px solid var(--color-primary);
+            border-radius: 4px;
+            font-size: 12px;
+            color: var(--color-text-muted);
+            line-height: 1.5;
         }
 
     </style>
@@ -616,90 +926,166 @@
 
 <body>
     <div class="container">
-        <!-- Chat Container -->
-        <div class="chat-container">
-            <div class="chat-header">
-                <div class="chat-title">CADZERO AI Assistant</div>
-                <div class="chat-controls">
-                    <div class="endpoint-toggle">
-                        <span class="endpoint-label">Local</span>
-                        <label class="toggle-switch">
-                            <input type="checkbox" id="endpointToggle" onchange="toggleEndpoint()">
-                            <span class="toggle-slider"></span>
-                        </label>
-                        <span class="endpoint-label" id="endpointStatus">Staging</span>
-                    </div>
-                    <button class="chat-btn" onclick="clearChat()">Clear</button>
-                    <button class="chat-btn" onclick="exportChat()">Export</button>
+        <!-- Authentication Section (only shown when not authenticated) -->
+        <div class="auth-section not-authenticated" id="authSection">
+            <div class="auth-status" id="authStatus">
+                <div class="auth-welcome">
+                    <div class="auth-welcome-title">🔐 Welcome to CADZERO AI</div>
+                    <div class="auth-welcome-subtitle">Sign in to start using AI-powered CAD assistance</div>
                 </div>
             </div>
-            <div class="chat-messages" id="chatMessages">
-                <!-- Messages will be added here -->
+            <button class="auth-btn" id="authBtn" onclick="handleAuthAction()">Sign In</button>
+        </div>
+        
+        <!-- Main Interface (hidden until authenticated) -->
+        <div id="mainInterface" class="hidden" style="display: flex; flex-direction: column; height: 100%; flex: 1;">
+            <!-- Header -->
+            <div class="header">
+                <div class="header-left">
+                    <button class="header-icon" onclick="handleSignOut()" title="Sign Out">
+                        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                            <path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4"></path>
+                            <polyline points="16 17 21 12 16 7"></polyline>
+                            <line x1="21" y1="12" x2="9" y2="12"></line>
+                        </svg>
+                    </button>
+                    <div class="header-user-info">
+                        <div class="header-user-name" id="headerUserName">User</div>
+                        <div class="header-user-email" id="headerUserEmail">user@example.com</div>
+                    </div>
+                </div>
+                <div class="header-right">
+                    <button class="header-btn" onclick="openSettings()" title="Settings">
+                        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                            <circle cx="12" cy="12" r="3"></circle>
+                            <path d="M12 1v6m0 6v6m6-12v6m0 6v6M6 1v6m0 6v6"></path>
+                        </svg>
+                    </button>
+                    <button class="header-btn" onclick="clearChat()" title="Clear">
+                        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                            <path d="M1 4v6h6M23 20v-6h-6M20.49 9A9 9 0 0 0 5.64 5.64L1 10m22 4l-4.64 4.36A9 9 0 0 1 3.51 15"></path>
+                        </svg>
+                    </button>
+                </div>
+            </div>
+
+            <!-- User Prompt Section (shown when there's a query) -->
+            <div class="user-prompt-section hidden" id="userPromptSection">
+                <div class="user-label">User</div>
+                <div class="user-query" id="userQuery"></div>
+                <div class="quick-actions" id="quickActions">
+                    <button class="quick-action-btn" onclick="executeCurrentPrompt()">
+                        <span>⚡</span>
+                        <span>Execute prompt</span>
+                    </button>
+                    <button class="quick-action-btn secondary" onclick="generateImages()">
+                        <span>🖼️</span>
+                        <span>Generate images</span>
+                    </button>
+                </div>
+            </div>
+
+            <!-- Status Bar -->
+            <div class="status-bar hidden" id="statusBar">
+                <span class="status-model">CADZERO AI</span>
+                <span class="status-divider">•</span>
+                <span class="status-time" id="statusTime">Ready</span>
+            </div>
+
+            <!-- Thinking Box -->
+            <div class="thinking-box hidden" id="thinkingBox">
+                <div class="thinking-content">
+                    <div class="thinking-icon"></div>
+                    <span class="thinking-text">Thinking...</span>
+                </div>
+                <span class="thinking-chevron">▼</span>
+            </div>
+
+            <!-- Content Area -->
+            <div class="content-area" id="contentArea">
+                <div class="chat-messages" id="chatMessages"></div>
+            </div>
+
+            <!-- Input Section -->
+            <div class="input-section">
+                <div class="input-container">
+                    <input type="text" class="input-field" id="userInput" placeholder="Make changes, add new features, ask for anything">
+                    <div class="input-actions">
+                        <button class="input-icon-btn" title="Commands">
+                            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                                <line x1="4" y1="9" x2="20" y2="9"></line>
+                                <line x1="4" y1="15" x2="14" y2="15"></line>
+                            </svg>
+                        </button>
+                        <button class="input-icon-btn" title="Voice input">
+                            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                                <path d="M12 1a3 3 0 0 0-3 3v8a3 3 0 0 0 6 0V4a3 3 0 0 0-3-3z"></path>
+                                <path d="M19 10v2a7 7 0 0 1-14 0v-2M12 19v4M8 23h8"></path>
+                            </svg>
+                        </button>
+                        <button class="input-icon-btn" title="Attachments">
+                            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                                <line x1="12" y1="5" x2="12" y2="19"></line>
+                                <line x1="5" y1="12" x2="19" y2="12"></line>
+                            </svg>
+                        </button>
+                        <button class="submit-btn" id="submitBtn" onclick="submit()" title="Send">
+                            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                                <rect x="3" y="3" width="18" height="18" rx="2"></rect>
+                                <circle cx="12" cy="12" r="3"></circle>
+                            </svg>
+                        </button>
+                    </div>
+                </div>
             </div>
         </div>
 
-        <!-- Debug Sections -->
-        <div class="debug-section" id="toolCallsSection">
+        <!-- Debug Sections (hidden by default) -->
+        <div class="debug-section hidden" id="toolCallsSection">
             <div class="debug-header" onclick="toggleDebugContent('toolCallsSection')">
                 <div class="debug-title">Tool Call History</div>
                 <div class="debug-toggle">▼</div>
             </div>
-            <div class="debug-content" id="toolCallsContent">
-                <!-- Tool call history will be displayed here -->
-            </div>
+            <div class="debug-content" id="toolCallsContent"></div>
         </div>
 
-        <div class="debug-section" id="executionLogSection">
+        <div class="debug-section hidden" id="executionLogSection">
             <div class="debug-header" onclick="toggleDebugContent('executionLogSection')">
                 <div class="debug-title">Execution Log</div>
                 <div class="debug-toggle">▼</div>
             </div>
-            <div class="debug-content" id="executionLogContent">
-                <!-- Execution log will be displayed here -->
-            </div>
+            <div class="debug-content" id="executionLogContent"></div>
         </div>
 
-        <div class="debug-section" id="rawDataSection">
-            <div class="debug-header" onclick="toggleDebugContent('rawDataSection')">
-                <div class="debug-title">Raw Data</div>
-                <div class="debug-toggle">▼</div>
-            </div>
-            <div class="debug-content" id="rawDataContent">
-                <!-- Raw data will be displayed here -->
-            </div>
-        </div>
-
-        <!-- Settings Bar -->
-        <div class="settings-bar">
-            <button class="settings-btn" id="toolCallsBtn" onclick="toggleDebugSection('toolCalls')">Tool Calls</button>
-            <button class="settings-btn" id="executionLogBtn" onclick="toggleDebugSection('executionLog')">Execution Log</button>
-            <button class="settings-btn" id="rawDataBtn" onclick="toggleDebugSection('rawData')">Raw Data</button>
-            <button class="settings-btn" onclick="clearChat()">Clear Chat</button>
-            <button class="settings-btn" onclick="exportChat()">Export</button>
-            
-            <div class="font-size-control">
-                <span style="font-size: 11px; color: var(--color-text-muted);">Size:</span>
-                <input type="range" class="font-size-slider" id="fontSizeSlider" min="10" max="20" value="14" oninput="updateFontSize(this.value)">
-                <span class="font-size-value" id="fontSizeValue">14px</span>
-            </div>
-        </div>
-
-        <!-- Example Prompts -->
-        <div class="example-prompts" id="examplePrompts">
-            <div class="example-bubble" onclick="sendExamplePrompt(0)" title="Create a mechanical gear assembly with the following steps: First, create a base gear with 20 teeth, 5cm outer diameter, and 1cm thickness. Then create a second smaller gear with 10 teeth that meshes with the first gear. Add a central shaft hole of 1cm diameter to both gears. Apply a 0.2cm fillet to all sharp edges. Finally, position the gears so they mesh properly with appropriate spacing.">
-                Build a mechanical gear assembly...
-            </div>
-            <div class="example-bubble" onclick="sendExamplePrompt(1)" title="Design a parametric electronics enclosure box with these specifications: Create a rectangular base 15cm x 10cm x 3cm. Add mounting posts at each corner (0.5cm diameter, 2cm height). Create a matching lid that's 0.5cm thick with snap-fit tabs. Add ventilation slots (0.3cm x 3cm) on two sides. Apply 0.3cm fillets to all external edges for a smooth finish. Ensure all dimensions are parametric for easy modification.">
-                Design a parametric enclosure box...
-            </div>
-        </div>
-
-        <!-- Input Section -->
-        <div class="input-section">
-            <div class="input-label">Ask CADZERO AI to create shapes, modify designs, or help with Fusion 360:</div>
-            <div class="input-container">
-                <input type="text" class="input-field" id="userInput" placeholder="e.g., 'Create a box 10cm x 5cm x 3cm' or 'Make a cylinder with radius 5cm and height 8cm'">
-                <button class="submit-btn" id="submitBtn" onclick="submit()">Send</button>
+        <!-- Auth Modal (hidden by default) -->
+        <div class="auth-modal-overlay hidden" id="authModal">
+            <div class="auth-modal">
+                <div class="auth-modal-header">
+                    <div class="auth-modal-icon">🔐</div>
+                    <div>
+                        <h2 class="auth-modal-title">Sign In to CADZERO</h2>
+                    </div>
+                </div>
+                <p class="auth-modal-subtitle">
+                    To continue, please authenticate in your browser. Click the button below to open the sign-in page, or copy the link manually.
+                </p>
+                <div class="auth-modal-link" id="authModalLink"></div>
+                <div class="auth-modal-actions">
+                    <button class="auth-modal-btn primary" onclick="openAuthInBrowser()">
+                        🌐 Open in Browser
+                    </button>
+                    <button class="auth-modal-btn secondary" onclick="copyAuthLink()">
+                        📋 Copy Link
+                    </button>
+                </div>
+                <div class="auth-modal-note">
+                    💡 <strong>Note:</strong> After signing in, return to Fusion 360. The palette will automatically update.
+                </div>
+                <div style="text-align: center; margin-top: 20px;">
+                    <button class="auth-modal-btn secondary" onclick="closeAuthModal()" style="max-width: 150px;">
+                        Cancel
+                    </button>
+                </div>
             </div>
         </div>
     </div>

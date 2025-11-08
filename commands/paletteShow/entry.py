@@ -8,6 +8,7 @@ import threading
 import time
 from ...lib import fusionAddInUtils as futil
 from ... import config
+from ... import auth
 from datetime import datetime
 
 app = adsk.core.Application.get()
@@ -273,6 +274,92 @@ def palette_incoming(html_args: adsk.core.HTMLEventArgs):
             'endpoint': 'staging' if is_staging else 'local',
             'url': config.current_endpoint
         })
+    elif message_action == 'signIn':
+        # Handle sign-in request - start async process
+        try:
+            futil.log('Initiating sign-in flow...', adsk.core.LogLevels.InfoLogLevel)
+            
+            # Return immediately to not block the UI
+            html_args.returnData = json.dumps({
+                'success': True,
+                'message': 'Opening browser for authentication...',
+                'status': 'processing'
+            })
+            
+            # Start sign-in in a separate thread
+            def sign_in_async():
+                try:
+                    success = auth.initiate_clerk_signin()
+                    
+                    if success:
+                        user = auth.get_current_user()
+                        futil.log(f'User signed in: {user.get("user_email")}', adsk.core.LogLevels.InfoLogLevel)
+                        
+                        # Send success response back to UI
+                        send_response_to_ui({
+                            'action': 'authComplete',
+                            'success': True,
+                            'message': 'Successfully signed in',
+                            'user': user
+                        })
+                    else:
+                        futil.log('Sign-in failed', adsk.core.LogLevels.WarningLogLevel)
+                        
+                        # Send failure response back to UI
+                        send_response_to_ui({
+                            'action': 'authComplete',
+                            'success': False,
+                            'message': 'Sign-in failed or was cancelled'
+                        })
+                except Exception as e:
+                    futil.log(f'Sign-in error: {str(e)}', adsk.core.LogLevels.ErrorLogLevel)
+                    
+                    # Send error response back to UI
+                    send_response_to_ui({
+                        'action': 'authComplete',
+                        'success': False,
+                        'message': f'Sign-in error: {str(e)}'
+                    })
+            
+            # Start async thread
+            thread = threading.Thread(target=sign_in_async, daemon=True)
+            thread.start()
+            
+        except Exception as e:
+            futil.log(f'Sign-in error: {str(e)}', adsk.core.LogLevels.ErrorLogLevel)
+            html_args.returnData = json.dumps({
+                'success': False,
+                'message': f'Sign-in error: {str(e)}'
+            })
+    elif message_action == 'signOut':
+        # Handle sign-out request
+        try:
+            auth.sign_out()
+            html_args.returnData = json.dumps({
+                'success': True,
+                'message': 'Successfully signed out'
+            })
+            futil.log('User signed out', adsk.core.LogLevels.InfoLogLevel)
+        except Exception as e:
+            futil.log(f'Sign-out error: {str(e)}', adsk.core.LogLevels.ErrorLogLevel)
+            html_args.returnData = json.dumps({
+                'success': False,
+                'message': f'Sign-out error: {str(e)}'
+            })
+    elif message_action == 'getAuthStatus':
+        # Return current authentication status
+        try:
+            user = auth.get_current_user()
+            html_args.returnData = json.dumps({
+                'success': True,
+                'user': user
+            })
+        except Exception as e:
+            futil.log(f'Error getting auth status: {str(e)}', adsk.core.LogLevels.ErrorLogLevel)
+            html_args.returnData = json.dumps({
+                'success': False,
+                'message': f'Error: {str(e)}'
+            })
     else:
         # Return value.
         now = datetime.now()
@@ -288,9 +375,15 @@ def send_response_to_ui(response_data):
         palette = palettes.itemById(PALETTE_ID)
         
         if palette:
+            # Extract action from response data, default to chatResponse for backward compatibility
+            action = response_data.get('action', 'chatResponse')
+            
+            # Create a copy of the data without the action key
+            data_to_send = {k: v for k, v in response_data.items() if k != 'action'}
+            
             # Send the response data to the UI
-            palette.sendInfoToHTML('chatResponse', json.dumps(response_data))
-            futil.log(f'Sent response to UI: {response_data}', adsk.core.LogLevels.InfoLogLevel)
+            palette.sendInfoToHTML(action, json.dumps(data_to_send))
+            futil.log(f'Sent {action} to UI', adsk.core.LogLevels.InfoLogLevel)
         else:
             futil.log('Palette not found, cannot send response to UI', adsk.core.LogLevels.ErrorLogLevel)
             
@@ -562,6 +655,19 @@ def send_chat_message(message, history=None):
         req = urllib.request.Request(chat_endpoint, data=json_data, method='POST')
         req.add_header('Content-Type', 'application/json')
         req.add_header('Accept', 'application/json')
+        
+        # Add authentication headers if user is authenticated
+        auth_headers = auth.get_auth_headers()
+        if auth_headers:
+            futil.log(f'Adding auth headers to request: {list(auth_headers.keys())}', adsk.core.LogLevels.InfoLogLevel)
+            for header_name, header_value in auth_headers.items():
+                req.add_header(header_name, header_value)
+                # Log token preview (first 20 chars)
+                if header_name == 'Authorization':
+                    token_preview = header_value[:30] + '...' if len(header_value) > 30 else header_value
+                    futil.log(f'Auth token: {token_preview}', adsk.core.LogLevels.InfoLogLevel)
+        else:
+            futil.log('No auth headers available - user may not be authenticated', adsk.core.LogLevels.WarningLogLevel)
 
         # Send the request
         with urllib.request.urlopen(req) as response:

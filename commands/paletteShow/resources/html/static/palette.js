@@ -17,6 +17,12 @@ let settings = {
     endpoint: 'local' // 'local' or 'staging'
 };
 
+// Authentication state
+let authState = {
+    isAuthenticated: false,
+    user: null
+};
+
 // Example prompts with detailed instructions
 const examplePrompts = [
     {
@@ -133,7 +139,18 @@ function addMessage(content, isUser = false, timestamp = null) {
 // Clear chat
 function clearChat() {
     if (confirm('Clear all chat messages?')) {
-        document.getElementById('chatMessages').innerHTML = '';
+        const chatMessages = document.getElementById('chatMessages');
+        if (chatMessages) chatMessages.innerHTML = '';
+        
+        // Hide user prompt section and status bar
+        const userPromptSection = document.getElementById('userPromptSection');
+        const statusBar = document.getElementById('statusBar');
+        const thinkingBox = document.getElementById('thinkingBox');
+        
+        if (userPromptSection) userPromptSection.classList.add('hidden');
+        if (statusBar) statusBar.classList.add('hidden');
+        if (thinkingBox) thinkingBox.classList.add('hidden');
+        
         conversationHistory = [];
         debugData = { toolCalls: [], executionLog: [], rawData: [] };
         updateDebugSections();
@@ -252,6 +269,12 @@ function submit() {
     const input = document.getElementById('userInput');
     const submitBtn = document.getElementById('submitBtn');
     
+    // Check if user is authenticated
+    if (!authState.isAuthenticated) {
+        addMessage('⚠️ Please sign in to use CADZERO AI', false);
+        return;
+    }
+    
     if (!input || !input.value.trim()) {
         console.log('No input to submit');
         return;
@@ -260,14 +283,13 @@ function submit() {
     const message = input.value.trim();
     input.value = ''; // Clear input immediately
     
+    // Show user prompt section with the query
+    showUserPrompt(message);
+    
     // Disable button during processing
     if (submitBtn) {
         submitBtn.disabled = true;
-        submitBtn.textContent = 'Sending...';
     }
-    
-    // Add user message to chat
-    addMessage(message, true);
     
     // Add user message to conversation history
     conversationHistory.push({
@@ -279,7 +301,7 @@ function submit() {
     addDebugLog(`User message: ${message}`);
     
     // Show loading indicator
-    const loadingId = showLoadingMessage();
+    showLoadingMessage();
     
     // Send chat message to backend via Fusion (non-blocking)
     const chatData = {
@@ -300,21 +322,18 @@ function submit() {
     // Check if adsk.fusionSendData is available
     if (typeof adsk === 'undefined' || typeof adsk.fusionSendData === 'undefined') {
         console.error('Fusion API not available');
-        hideLoadingMessage(loadingId);
+        hideLoadingMessage();
         addMessage('❌ Error: Fusion API not available. Make sure this is running inside Fusion 360.', false);
         addDebugLog('Error: Fusion API not available', 'executionLog');
         
         // Re-enable button
-        if (submitBtn) {
-            submitBtn.disabled = false;
-            submitBtn.textContent = 'Send';
-        }
+        if (submitBtn) submitBtn.disabled = false;
         return;
     }
     
     adsk.fusionSendData('chatMessage', JSON.stringify(chatData))
         .then((result) => {
-            hideLoadingMessage(loadingId);
+            hideLoadingMessage();
             console.log('Raw result:', result);
             
             try {
@@ -330,7 +349,7 @@ function submit() {
                 updateDebugSections();
                 
                 if (response.success && response.status === 'processing') {
-                    addMessage('⏳ Processing your request...', false);
+                    // Keep showing thinking box
                 } else if (response.success) {
                     displayChatResponse(response);
                 } else {
@@ -346,38 +365,72 @@ function submit() {
             }
             
             // Re-enable button
-            if (submitBtn) {
-                submitBtn.disabled = false;
-                submitBtn.textContent = 'Send';
-            }
+            if (submitBtn) submitBtn.disabled = false;
         })
         .catch((error) => {
-            hideLoadingMessage(loadingId);
+            hideLoadingMessage();
             console.log('Request error:', error);
             addMessage(`❌ Error: ${error}`, false);
             addDebugLog(`Request error: ${error}`, 'executionLog');
             
             // Re-enable button
-            if (submitBtn) {
-                submitBtn.disabled = false;
-                submitBtn.textContent = 'Send';
-            }
+            if (submitBtn) submitBtn.disabled = false;
         });
 }
 
-function showLoadingMessage() {
-    const loadingId = 'loading-' + Date.now();
-    addMessage('Thinking...', false);
-    return loadingId;
+// Show user prompt section
+function showUserPrompt(message) {
+    const userPromptSection = document.getElementById('userPromptSection');
+    const userQuery = document.getElementById('userQuery');
+    
+    if (userQuery) userQuery.textContent = message;
+    if (userPromptSection) userPromptSection.classList.remove('hidden');
 }
 
-function hideLoadingMessage(loadingId) {
-    // Remove the last message if it's a loading message
-    const messages = document.querySelectorAll('.message');
-    const lastMessage = messages[messages.length - 1];
-    if (lastMessage && lastMessage.querySelector('.message-text').textContent.includes('Thinking')) {
-        lastMessage.remove();
+// Update status bar with timer
+let statusStartTime = null;
+let statusTimer = null;
+
+function showLoadingMessage() {
+    // Show status bar
+    const statusBar = document.getElementById('statusBar');
+    if (statusBar) statusBar.classList.remove('hidden');
+    
+    // Start timer
+    statusStartTime = Date.now();
+    updateStatusTimer();
+    statusTimer = setInterval(updateStatusTimer, 1000);
+    
+    // Show thinking box
+    const thinkingBox = document.getElementById('thinkingBox');
+    if (thinkingBox) thinkingBox.classList.remove('hidden');
+}
+
+function updateStatusTimer() {
+    if (!statusStartTime) return;
+    
+    const elapsed = Math.floor((Date.now() - statusStartTime) / 1000);
+    const statusTime = document.getElementById('statusTime');
+    if (statusTime) {
+        statusTime.textContent = `Running for ${elapsed}s`;
     }
+}
+
+function hideLoadingMessage() {
+    // Stop timer
+    if (statusTimer) {
+        clearInterval(statusTimer);
+        statusTimer = null;
+        statusStartTime = null;
+    }
+    
+    // Update status to complete
+    const statusTime = document.getElementById('statusTime');
+    if (statusTime) statusTime.textContent = 'Complete';
+    
+    // Hide thinking box
+    const thinkingBox = document.getElementById('thinkingBox');
+    if (thinkingBox) thinkingBox.classList.add('hidden');
 }
 
 function displayChatResponse(response) {
@@ -512,6 +565,142 @@ function sendExamplePrompt(index) {
     }
 }
 
+// New UI helper functions
+function openSettings() {
+    // Toggle debug sections visibility
+    const toolCallsSection = document.getElementById('toolCallsSection');
+    const executionLogSection = document.getElementById('executionLogSection');
+    
+    if (toolCallsSection) toolCallsSection.classList.toggle('hidden');
+    if (executionLogSection) executionLogSection.classList.toggle('hidden');
+}
+
+function executeCurrentPrompt() {
+    const userQuery = document.getElementById('userQuery');
+    if (userQuery && userQuery.textContent) {
+        const input = document.getElementById('userInput');
+        if (input) {
+            input.value = userQuery.textContent;
+            submit();
+        }
+    }
+}
+
+function generateImages() {
+    addMessage('🖼️ Image generation feature coming soon!', false);
+}
+
+// Auth modal functions
+let authUrl = '';
+
+function showAuthModal() {
+    console.log('Showing auth modal...');
+    
+    // Get auth URL from config
+    // Format: http://localhost:5173/sign-in?redirect_url=http://localhost:8765/
+    const callbackUrl = 'http://localhost:8765/';
+    const baseUrl = 'http://localhost:5173/sign-in'; // TODO: Get from backend based on endpoint
+    authUrl = `${baseUrl}?redirect_url=${encodeURIComponent(callbackUrl)}`;
+    
+    console.log('Auth URL:', authUrl);
+    
+    // Update modal with URL
+    const authModalLink = document.getElementById('authModalLink');
+    if (authModalLink) {
+        authModalLink.textContent = authUrl;
+    }
+    
+    // Show modal
+    const authModal = document.getElementById('authModal');
+    if (authModal) {
+        authModal.classList.remove('hidden');
+    }
+    
+    // Start waiting for callback
+    startAuthCallback();
+}
+
+function closeAuthModal() {
+    const authModal = document.getElementById('authModal');
+    if (authModal) {
+        authModal.classList.add('hidden');
+    }
+}
+
+function openAuthInBrowser() {
+    console.log('Opening auth URL in browser:', authUrl);
+    
+    // Try to open using window.open (may be blocked)
+    const newWindow = window.open(authUrl, '_blank');
+    
+    if (!newWindow || newWindow.closed || typeof newWindow.closed === 'undefined') {
+        // Popup blocked, show message
+        alert('Pop-up blocked! Please allow pop-ups or copy the link manually.');
+    } else {
+        console.log('Browser window opened successfully');
+    }
+}
+
+function copyAuthLink() {
+    // Copy to clipboard
+    if (navigator.clipboard && navigator.clipboard.writeText) {
+        navigator.clipboard.writeText(authUrl)
+            .then(() => {
+                // Show success feedback
+                const btn = event.target;
+                const originalText = btn.textContent;
+                btn.textContent = '✅ Copied!';
+                btn.style.background = 'var(--color-success)';
+                
+                setTimeout(() => {
+                    btn.textContent = originalText;
+                    btn.style.background = '';
+                }, 2000);
+            })
+            .catch(err => {
+                console.error('Failed to copy:', err);
+                alert('Failed to copy. Please select and copy the link manually.');
+            });
+    } else {
+        // Fallback: try to select text
+        const linkEl = document.getElementById('authModalLink');
+        if (linkEl) {
+            const range = document.createRange();
+            range.selectNodeContents(linkEl);
+            const selection = window.getSelection();
+            selection.removeAllRanges();
+            selection.addRange(range);
+            alert('Link selected. Press Ctrl+C (or Cmd+C) to copy.');
+        }
+    }
+}
+
+function startAuthCallback() {
+    console.log('Starting auth callback listener...');
+    
+    // Tell backend to start listening for auth callback
+    if (typeof adsk !== 'undefined' && typeof adsk.fusionSendData !== 'undefined') {
+        adsk.fusionSendData('signIn', JSON.stringify({}))
+            .then((result) => {
+                console.log('Backend auth listener started:', result);
+                const response = JSON.parse(result);
+                
+                if (response.success && response.status === 'processing') {
+                    console.log('Backend is waiting for auth callback...');
+                    addDebugLog('Waiting for authentication callback');
+                }
+            })
+            .catch((error) => {
+                console.error('Error starting auth listener:', error);
+                addDebugLog('Error starting auth listener: ' + error);
+            });
+    } else {
+        console.error('Fusion API not available');
+        alert('Error: Fusion 360 API not available. Please restart the add-in.');
+        closeAuthModal();
+    }
+}
+
 // Initialize
 window.addEventListener('load', function() {
     console.log('CADZERO AI initializing...');
@@ -519,9 +708,8 @@ window.addEventListener('load', function() {
     // Load settings
     loadSettings();
     
-    // Add welcome message
-    addMessage('🚀 CADZERO AI Assistant initialized', false);
-    addMessage('💡 Click an example below or type your own request', false);
+    // Check authentication status
+    checkAuthStatus();
     
     // Add debug log
     addDebugLog('Application initialized');
@@ -530,7 +718,8 @@ window.addEventListener('load', function() {
     const input = document.getElementById('userInput');
     if (input) {
         input.addEventListener('keypress', function(e) {
-            if (e.key === 'Enter') {
+            if (e.key === 'Enter' && !e.shiftKey) {
+                e.preventDefault();
                 submit();
             }
         });
@@ -621,6 +810,200 @@ function syncEndpointWithBackend() {
         });
 }
 
+// Authentication functions
+async function checkAuthStatus() {
+    console.log('=== Checking authentication status ===');
+    console.log('adsk available:', typeof adsk !== 'undefined');
+    
+    // Check if adsk is available
+    if (typeof adsk === 'undefined' || typeof adsk.fusionSendData === 'undefined') {
+        console.warn('Fusion API not yet available, will check auth status later');
+        // Show not authenticated state
+        updateAuthUI();
+        
+        // Try again after a delay
+        setTimeout(() => {
+            console.log('Retrying auth status check...');
+            checkAuthStatus();
+        }, 1000);
+        return;
+    }
+    
+    try {
+        console.log('Calling getAuthStatus...');
+        const result = await adsk.fusionSendData('getAuthStatus', JSON.stringify({}));
+        console.log('getAuthStatus result:', result);
+        
+        const response = JSON.parse(result);
+        console.log('Parsed auth response:', response);
+        
+        if (response.success && response.user) {
+            authState.isAuthenticated = response.user.is_authenticated;
+            authState.user = response.user;
+            console.log('Auth status retrieved:', authState);
+            updateAuthUI();
+        } else {
+            // Not authenticated
+            console.log('Not authenticated');
+            updateAuthUI();
+        }
+    } catch (error) {
+        console.error('Error checking auth status:', error);
+        addDebugLog(`Error checking auth status: ${error}`);
+        updateAuthUI();
+    }
+}
+
+function updateAuthUI() {
+    const container = document.querySelector('.container');
+    const authSection = document.getElementById('authSection');
+    const mainInterface = document.getElementById('mainInterface');
+    const userInput = document.getElementById('userInput');
+    const submitBtn = document.getElementById('submitBtn');
+    
+    if (authState.isAuthenticated && authState.user) {
+        // User is authenticated - show main interface
+        if (container) container.classList.remove('not-authenticated');
+        if (authSection) authSection.classList.add('hidden');
+        if (mainInterface) {
+            mainInterface.classList.remove('hidden');
+            mainInterface.style.display = 'flex';
+        }
+        
+        // Update header with user info
+        const headerUserName = document.getElementById('headerUserName');
+        const headerUserEmail = document.getElementById('headerUserEmail');
+        
+        if (headerUserName) {
+            headerUserName.textContent = authState.user.user_name || 'User';
+        }
+        if (headerUserEmail) {
+            headerUserEmail.textContent = authState.user.user_email || '';
+        }
+        
+        // Enable input
+        if (userInput) {
+            userInput.disabled = false;
+        }
+        if (submitBtn) submitBtn.disabled = false;
+    } else {
+        // User is not authenticated - show auth section only
+        if (container) container.classList.add('not-authenticated');
+        if (authSection) authSection.classList.remove('hidden');
+        if (mainInterface) {
+            mainInterface.classList.add('hidden');
+            mainInterface.style.display = 'none';
+        }
+        
+        // Disable input
+        if (userInput) {
+            userInput.disabled = true;
+            userInput.value = '';
+        }
+        if (submitBtn) submitBtn.disabled = true;
+    }
+}
+
+// Handle sign out from header button
+async function handleSignOut() {
+    if (!confirm('Are you sure you want to sign out?')) {
+        return;
+    }
+    
+    console.log('=== SIGN OUT FLOW STARTING ===');
+    
+    try {
+        const result = await adsk.fusionSendData('signOut', JSON.stringify({}));
+        const response = JSON.parse(result);
+        
+        if (response.success) {
+            authState.isAuthenticated = false;
+            authState.user = null;
+            
+            // Clear chat and reset UI
+            const chatMessages = document.getElementById('chatMessages');
+            if (chatMessages) chatMessages.innerHTML = '';
+            conversationHistory = [];
+            
+            updateAuthUI();
+            addDebugLog('User signed out');
+            console.log('Successfully signed out');
+        } else {
+            addDebugLog('Sign out failed: ' + (response.message || 'Unknown error'));
+            console.error('Sign out failed:', response);
+            alert('Sign out failed: ' + (response.message || 'Unknown error'));
+        }
+    } catch (error) {
+        console.error('Sign out error:', error);
+        addDebugLog('Sign out error: ' + error);
+        alert('Sign out error: ' + error);
+    }
+}
+
+async function handleAuthAction() {
+    console.log('=== handleAuthAction CALLED ===');
+    console.log('Auth state:', authState);
+    
+    if (authState.isAuthenticated) {
+        // Sign out from auth section (shouldn't normally be visible)
+        await handleSignOut();
+    } else {
+        // Sign in - show modal with auth link
+        console.log('=== SIGN IN FLOW STARTING ===');
+        showAuthModal();
+    }
+}
+
+function showAuthLoadingState() {
+    const authSection = document.getElementById('authSection');
+    const authBtn = document.getElementById('authBtn');
+    
+    if (!authBtn || !authSection) return;
+    
+    // Disable button
+    authBtn.disabled = true;
+    authBtn.textContent = 'Authenticating...';
+    
+    // Show loading indicator in auth status
+    const authStatus = document.getElementById('authStatus');
+    if (authStatus) {
+        authStatus.innerHTML = `
+            <div class="auth-welcome">
+                <div class="auth-welcome-title">
+                    <div class="loader">
+                        <div class="loader-dot"></div>
+                        <div class="loader-dot"></div>
+                        <div class="loader-dot"></div>
+                    </div>
+                </div>
+                <div class="auth-welcome-subtitle">Opening browser for authentication...</div>
+            </div>
+        `;
+    }
+}
+
+function hideAuthLoadingState() {
+    const authSection = document.getElementById('authSection');
+    const authBtn = document.getElementById('authBtn');
+    const authStatus = document.getElementById('authStatus');
+    
+    if (!authBtn || !authSection) return;
+    
+    // Re-enable button
+    authBtn.disabled = false;
+    authBtn.textContent = 'Sign In';
+    
+    // Reset auth status to welcome message
+    if (authStatus) {
+        authStatus.innerHTML = `
+            <div class="auth-welcome">
+                <div class="auth-welcome-title">🔐 Welcome to CADZERO AI</div>
+                <div class="auth-welcome-subtitle">Sign in to start using AI-powered CAD assistance</div>
+            </div>
+        `;
+    }
+}
+
 // Handler for messages from Fusion
 window.fusionJavaScriptHandler = {
     handle: function (action, data) {
@@ -636,6 +1019,31 @@ window.fusionJavaScriptHandler = {
                 console.log('Received chatResponse:', data);
                 const response = JSON.parse(data);
                 displayChatResponse(response);
+            } else if (action === "authComplete") {
+                // Handle authentication completion from async sign-in flow
+                console.log('Received authComplete:', data);
+                const response = JSON.parse(data);
+                
+                // Close auth modal
+                closeAuthModal();
+                hideAuthLoadingState();
+                
+                if (response.success && response.user) {
+                    // Sign-in successful
+                    authState.isAuthenticated = response.user.is_authenticated;
+                    authState.user = response.user;
+                    updateAuthUI();
+                    addDebugLog('User signed in: ' + (response.user.user_email || 'user'));
+                    console.log('Auth complete - signed in:', response.user.user_email);
+                    
+                    // Show success message briefly
+                    alert('✅ Successfully signed in as ' + (response.user.user_email || 'user'));
+                } else {
+                    // Sign-in failed
+                    addDebugLog('Sign-in failed: ' + (response.message || 'Unknown error'));
+                    console.error('Auth complete - sign-in failed:', response.message);
+                    alert('❌ Sign-in failed: ' + (response.message || 'Unknown error'));
+                }
             } else if (action === "debugger") {
                 debugger;
             } else {
@@ -651,3 +1059,4 @@ window.fusionJavaScriptHandler = {
         return "OK";
     }
 };
+

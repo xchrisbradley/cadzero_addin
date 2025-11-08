@@ -1,0 +1,12 @@
+# Authentication token - DO NOT COMMIT
+.auth_token.json
+
+# Python cache
+__pycache__/
+*.py[cod]
+*$py.class
+
+# IDE
+.vscode/
+.idea/
+
