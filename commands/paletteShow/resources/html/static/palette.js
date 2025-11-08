@@ -107,14 +107,10 @@ function toggleDebugContent(sectionId) {
 }
 
 // Chat management
-function addMessage(content, isUser = false, timestamp = null) {
+function addMessage(content, isUser = false, timestamp = null, addActions = false) {
     const chatMessages = document.getElementById('chatMessages');
     const messageDiv = document.createElement('div');
     messageDiv.className = `message ${isUser ? 'user' : 'assistant'}`;
-    
-    const avatar = document.createElement('div');
-    avatar.className = 'message-avatar';
-    avatar.textContent = isUser ? 'U' : 'AI';
     
     const messageContent = document.createElement('div');
     messageContent.className = 'message-content';
@@ -129,11 +125,78 @@ function addMessage(content, isUser = false, timestamp = null) {
     
     messageContent.appendChild(messageText);
     messageContent.appendChild(messageTime);
-    messageDiv.appendChild(avatar);
     messageDiv.appendChild(messageContent);
     
     chatMessages.appendChild(messageDiv);
+    
+    // Add action buttons if requested
+    if (addActions && !isUser) {
+        addMessageActions(messageDiv);
+    }
+    
     scrollToBottom(chatMessages);
+}
+
+// Add user message with special styling
+function addUserMessage(content) {
+    const chatMessages = document.getElementById('chatMessages');
+    
+    // Create user prompt section
+    const userSection = document.createElement('div');
+    userSection.className = 'chat-user-section';
+    
+    const userLabel = document.createElement('div');
+    userLabel.className = 'chat-user-label';
+    userLabel.textContent = 'USER';
+    
+    const userQuery = document.createElement('div');
+    userQuery.className = 'chat-user-query';
+    userQuery.textContent = content;
+    
+    userSection.appendChild(userLabel);
+    userSection.appendChild(userQuery);
+    chatMessages.appendChild(userSection);
+    
+    scrollToBottom(chatMessages);
+}
+
+// Add status bar message
+function addStatusMessage(status = 'Complete', elapsed = null) {
+    const chatMessages = document.getElementById('chatMessages');
+    
+    const statusDiv = document.createElement('div');
+    statusDiv.className = 'chat-status-bar';
+    statusDiv.id = 'currentStatusBar';
+    
+    const statusModel = document.createElement('span');
+    statusModel.className = 'status-model';
+    statusModel.textContent = 'CADZERO AI';
+    
+    const statusDivider = document.createElement('span');
+    statusDivider.className = 'status-divider';
+    statusDivider.textContent = '•';
+    
+    const statusText = document.createElement('span');
+    statusText.className = 'status-time';
+    statusText.textContent = elapsed ? `Ran for ${elapsed}s` : status;
+    
+    statusDiv.appendChild(statusModel);
+    statusDiv.appendChild(statusDivider);
+    statusDiv.appendChild(statusText);
+    
+    chatMessages.appendChild(statusDiv);
+    scrollToBottom(chatMessages);
+}
+
+// Update status message
+function updateStatusMessage(status, elapsed = null) {
+    const statusBar = document.getElementById('currentStatusBar');
+    if (statusBar) {
+        const statusText = statusBar.querySelector('.status-time');
+        if (statusText) {
+            statusText.textContent = elapsed ? `Ran for ${elapsed}s` : status;
+        }
+    }
 }
 
 // Clear chat
@@ -142,13 +205,8 @@ function clearChat() {
         const chatMessages = document.getElementById('chatMessages');
         if (chatMessages) chatMessages.innerHTML = '';
         
-        // Hide user prompt section and status bar
-        const userPromptSection = document.getElementById('userPromptSection');
-        const statusBar = document.getElementById('statusBar');
+        // Hide thinking box
         const thinkingBox = document.getElementById('thinkingBox');
-        
-        if (userPromptSection) userPromptSection.classList.add('hidden');
-        if (statusBar) statusBar.classList.add('hidden');
         if (thinkingBox) thinkingBox.classList.add('hidden');
         
         conversationHistory = [];
@@ -289,8 +347,11 @@ function submit() {
     const message = input.value.trim();
     input.value = ''; // Clear input immediately
     
-    // Show user prompt section with the query
-    showUserPrompt(message);
+    // Add user message to chat
+    addUserMessage(message);
+    
+    // Add "Thinking" status
+    addStatusMessage('Thinking');
     
     // Disable button during processing
     if (submitBtn) {
@@ -384,13 +445,10 @@ function submit() {
         });
 }
 
-// Show user prompt section
+// Show user prompt section (deprecated - now handled in chat)
 function showUserPrompt(message) {
-    const userPromptSection = document.getElementById('userPromptSection');
-    const userQuery = document.getElementById('userQuery');
-    
-    if (userQuery) userQuery.textContent = message;
-    if (userPromptSection) userPromptSection.classList.remove('hidden');
+    // No longer used - user prompt is now part of chat history
+    console.log('showUserPrompt called (deprecated)');
 }
 
 // Update status bar with timer
@@ -398,45 +456,54 @@ let statusStartTime = null;
 let statusTimer = null;
 
 function showLoadingMessage() {
-    // Show status bar
-    const statusBar = document.getElementById('statusBar');
-    if (statusBar) statusBar.classList.remove('hidden');
-    
     // Start timer
     statusStartTime = Date.now();
     updateStatusTimer();
     statusTimer = setInterval(updateStatusTimer, 1000);
     
-    // Show thinking box
+    // Show thinking box with active animation
     const thinkingBox = document.getElementById('thinkingBox');
-    if (thinkingBox) thinkingBox.classList.remove('hidden');
+    if (thinkingBox) {
+        thinkingBox.classList.remove('hidden');
+        thinkingBox.classList.add('active');
+        const thinkingText = thinkingBox.querySelector('.thinking-text');
+        if (thinkingText) {
+            thinkingText.textContent = 'Thinking...';
+        }
+    }
 }
 
 function updateStatusTimer() {
     if (!statusStartTime) return;
     
     const elapsed = Math.floor((Date.now() - statusStartTime) / 1000);
-    const statusTime = document.getElementById('statusTime');
-    if (statusTime) {
-        statusTime.textContent = `Running for ${elapsed}s`;
-    }
+    // Timer is now handled in the thinking box
 }
 
 function hideLoadingMessage() {
+    // Calculate elapsed time
+    const elapsed = statusStartTime ? Math.floor((Date.now() - statusStartTime) / 1000) : 0;
+    
     // Stop timer
     if (statusTimer) {
         clearInterval(statusTimer);
         statusTimer = null;
-        statusStartTime = null;
     }
     
-    // Update status to complete
-    const statusTime = document.getElementById('statusTime');
-    if (statusTime) statusTime.textContent = 'Complete';
-    
-    // Hide thinking box
+    // Update thinking box to show thought duration
     const thinkingBox = document.getElementById('thinkingBox');
-    if (thinkingBox) thinkingBox.classList.add('hidden');
+    if (thinkingBox && elapsed > 0) {
+        thinkingBox.classList.remove('active');
+        const thinkingText = thinkingBox.querySelector('.thinking-text');
+        if (thinkingText) {
+            thinkingText.textContent = `Thought for ${elapsed} second${elapsed !== 1 ? 's' : ''}`;
+        }
+        // Keep it visible but not animating
+    } else if (thinkingBox) {
+        thinkingBox.classList.add('hidden');
+    }
+    
+    statusStartTime = null;
 }
 
 function displayChatResponse(response) {
@@ -461,23 +528,18 @@ function displayChatResponse(response) {
             addDebugLog(`Executed ${response.tool_calls.length} tool(s)`, 'executionLog');
         }
         
-        // Build a single comprehensive response message
-        let fullResponse = '';
+        // Update status bar to complete
+        const elapsed = statusStartTime ? Math.floor((Date.now() - statusStartTime) / 1000) : null;
+        updateStatusMessage('Complete', elapsed);
         
-        // Add execution results if available
+        // Display tool execution results if available
         if (response.execution_results && response.execution_results.length > 0) {
-            fullResponse += '🔧 Tool Execution Results:\n';
-            response.execution_results.forEach((result, index) => {
-                const statusIcon = result.success ? '✅' : '❌';
-                fullResponse += `  ${statusIcon} ${result.tool_name}: ${result.message}\n`;
-                addDebugLog(`${statusIcon} ${result.tool_name}: ${result.message}`, 'executionLog');
-            });
-            fullResponse += '\n';
+            addToolExecutionResults(response.execution_results);
         }
         
-        // Add the main AI response
+        // Add the main AI response with action buttons
         if (aiResponse) {
-            fullResponse += aiResponse;
+            addMessage(aiResponse, false, null, true);
             
             // Add assistant response to conversation history
             conversationHistory.push({
@@ -486,22 +548,142 @@ function displayChatResponse(response) {
             });
         }
         
-        // Add tool call summary if available
-        if (response.tool_calls && response.tool_calls.length > 0) {
-            fullResponse += `\n\n📋 Executed ${response.tool_calls.length} tool(s)`;
-        }
-        
-        // Display the single comprehensive response
-        if (fullResponse.trim()) {
-            addMessage(fullResponse, false);
-        }
-        
         updateDebugSections();
     } else {
         const errorMsg = response.error || 'Unknown error';
         console.log('Error:', errorMsg);
         addMessage(`❌ Error: ${errorMsg}`, false);
         addDebugLog(`Error: ${errorMsg}`, 'executionLog');
+    }
+}
+
+// Add tool execution results with modern checkmark design
+function addToolExecutionResults(executionResults) {
+    const chatMessages = document.getElementById('chatMessages');
+    const messageDiv = document.createElement('div');
+    messageDiv.className = 'message assistant tool-execution';
+    
+    const messageContent = document.createElement('div');
+    messageContent.className = 'message-content';
+    
+    // Create tool results list
+    const toolsList = document.createElement('div');
+    toolsList.className = 'tools-list';
+    
+    executionResults.forEach((result, index) => {
+        const toolItem = document.createElement('div');
+        toolItem.className = `tool-item ${result.success ? 'success' : 'error'}`;
+        
+        const toolInfo = document.createElement('div');
+        toolInfo.className = 'tool-info';
+        
+        const toolName = document.createElement('div');
+        toolName.className = 'tool-name';
+        // Display message if available, otherwise tool name
+        toolName.textContent = result.message || result.tool_name;
+        
+        toolInfo.appendChild(toolName);
+        
+        const checkmark = document.createElement('div');
+        checkmark.className = 'tool-checkmark';
+        checkmark.innerHTML = result.success ? 
+            '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3"><polyline points="20 6 9 17 4 12"></polyline></svg>' :
+            '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3"><line x1="18" y1="6" x2="6" y2="18"></line><line x1="6" y1="6" x2="18" y2="18"></line></svg>';
+        
+        toolItem.appendChild(toolInfo);
+        toolItem.appendChild(checkmark);
+        toolsList.appendChild(toolItem);
+        
+        addDebugLog(`${result.success ? '✅' : '❌'} ${result.tool_name}: ${result.message}`, 'executionLog');
+    });
+    
+    messageContent.appendChild(toolsList);
+    messageDiv.appendChild(messageContent);
+    
+    chatMessages.appendChild(messageDiv);
+    scrollToBottom(chatMessages);
+}
+
+// Add action buttons to a message
+function addMessageActions(messageDiv) {
+    const messageContent = messageDiv.querySelector('.message-content');
+    if (!messageContent) return;
+    
+    // Check if actions already exist
+    if (messageContent.querySelector('.message-actions')) return;
+    
+    const actionsDiv = document.createElement('div');
+    actionsDiv.className = 'message-actions';
+    
+    // Row 1: Checkpoint on left, View diff & Restore checkpoint on right
+    const row1 = document.createElement('div');
+    row1.className = 'message-actions-row';
+    
+    const checkpointBtn = document.createElement('button');
+    checkpointBtn.className = 'message-action-btn';
+    checkpointBtn.innerHTML = `
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+            <path d="M4 15s1-1 4-1 5 2 8 2 4-1 4-1V3s-1 1-4 1-5-2-8-2-4 1-4 1z"></path>
+            <line x1="4" y1="22" x2="4" y2="15"></line>
+        </svg>
+        <span>Checkpoint</span>
+    `;
+    checkpointBtn.onclick = () => console.log('Checkpoint saved');
+    
+    // Right side group
+    const rightGroup = document.createElement('div');
+    rightGroup.className = 'message-actions-right';
+    
+    const viewDiffBtn = document.createElement('button');
+    viewDiffBtn.className = 'message-action-btn';
+    viewDiffBtn.textContent = 'View diff';
+    viewDiffBtn.onclick = () => console.log('View diff');
+    
+    const restoreBtn = document.createElement('button');
+    restoreBtn.className = 'message-action-btn';
+    restoreBtn.textContent = 'Restore checkpoint';
+    restoreBtn.onclick = () => console.log('Restore checkpoint');
+    
+    rightGroup.appendChild(viewDiffBtn);
+    rightGroup.appendChild(restoreBtn);
+    
+    row1.appendChild(checkpointBtn);
+    row1.appendChild(rightGroup);
+    
+    // Row 2: Vote buttons
+    const voteBtns = document.createElement('div');
+    voteBtns.className = 'message-vote-btns';
+    
+    const thumbsUpBtn = document.createElement('button');
+    thumbsUpBtn.className = 'message-action-btn icon-only';
+    thumbsUpBtn.innerHTML = `
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+            <path d="M14 9V5a3 3 0 0 0-3-3l-4 9v11h11.28a2 2 0 0 0 2-1.7l1.38-9a2 2 0 0 0-2-2.3zM7 22H4a2 2 0 0 1-2-2v-7a2 2 0 0 1 2-2h3"></path>
+        </svg>
+    `;
+    thumbsUpBtn.onclick = () => console.log('Thumbs up');
+    
+    const thumbsDownBtn = document.createElement('button');
+    thumbsDownBtn.className = 'message-action-btn icon-only';
+    thumbsDownBtn.innerHTML = `
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+            <path d="M10 15v4a3 3 0 0 0 3 3l4-9V2H5.72a2 2 0 0 0-2 1.7l-1.38 9a2 2 0 0 0 2 2.3zm7-13h2.67A2.31 2.31 0 0 1 22 4v7a2.31 2.31 0 0 1-2.33 2H17"></path>
+        </svg>
+    `;
+    thumbsDownBtn.onclick = () => console.log('Thumbs down');
+    
+    voteBtns.appendChild(thumbsUpBtn);
+    voteBtns.appendChild(thumbsDownBtn);
+    
+    actionsDiv.appendChild(row1);
+    actionsDiv.appendChild(voteBtns);
+    
+    // Insert before the timestamp
+    const messageTime = messageContent.querySelector('.message-time');
+    if (messageTime) {
+        messageContent.insertBefore(actionsDiv, messageTime);
+    } else {
+        messageContent.appendChild(actionsDiv);
     }
 }
 
@@ -515,6 +697,14 @@ function scrollToBottom(element) {
 function closeWindow() {
     addDebugLog('Closing palette...');
     console.log('Close requested');
+}
+
+// Toggle thinking box expanded state
+function toggleThinkingBox() {
+    const thinkingBox = document.getElementById('thinkingBox');
+    if (thinkingBox) {
+        thinkingBox.classList.toggle('expanded');
+    }
 }
 
 // Send command to Fusion (async to prevent blocking)
@@ -720,13 +910,26 @@ window.addEventListener('load', function() {
     // Add debug log
     addDebugLog('Application initialized');
     
-    // Add Enter key support for input field
+    // Add Enter key support for input field (backup to inline handler)
     const input = document.getElementById('userInput');
+    const submitBtn = document.getElementById('submitBtn');
+    
     if (input) {
-        input.addEventListener('keypress', function(e) {
-            if (e.key === 'Enter' && !e.shiftKey) {
+        // Enable/disable submit button based on input
+        input.addEventListener('input', function(e) {
+            if (submitBtn) {
+                submitBtn.disabled = !e.target.value.trim();
+            }
+        });
+        
+        input.addEventListener('keydown', function(e) {
+            console.log('keydown event:', e.key, e.keyCode, e.which);
+            if ((e.key === 'Enter' || e.keyCode === 13 || e.which === 13) && !e.shiftKey) {
                 e.preventDefault();
+                e.stopPropagation();
+                console.log('Enter pressed, submitting...');
                 submit();
+                return false;
             }
         });
     }

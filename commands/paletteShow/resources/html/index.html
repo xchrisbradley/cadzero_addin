@@ -163,28 +163,26 @@
             height: 18px;
         }
 
-        /* User Prompt Section */
+        /* User Prompt Section - Hidden (now part of chat) */
         .user-prompt-section {
-            padding: 20px 20px 16px;
-            flex-shrink: 0;
-        }
-
-        .user-prompt-section.hidden {
-            display: none;
+            display: none !important;
         }
 
         .user-label {
-            font-size: 13px;
-            color: var(--color-text-secondary);
-            font-weight: 500;
-            margin-bottom: 12px;
+            font-size: 11px;
+            color: var(--color-text-muted);
+            font-weight: 600;
+            margin-bottom: 8px;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
         }
 
         .user-query {
-            font-size: 15px;
+            font-size: 14px;
             color: var(--color-text-primary);
-            line-height: 1.5;
-            margin-bottom: 16px;
+            line-height: 1.6;
+            margin-bottom: 14px;
+            font-weight: 400;
         }
 
         .quick-actions {
@@ -194,76 +192,61 @@
         }
 
         .quick-action-btn {
-            background: linear-gradient(135deg, var(--color-primary) 0%, #3b82f6 100%);
-            border: none;
+            background: var(--color-primary);
+            border: 1px solid var(--color-primary);
             color: white;
             padding: 10px 16px;
-            border-radius: var(--radius-lg);
+            border-radius: var(--radius-md);
             cursor: pointer;
             font-size: 13px;
-            font-weight: 500;
+            font-weight: 600;
             transition: all 0.2s ease;
             display: flex;
             align-items: center;
-            gap: 6px;
+            gap: 8px;
         }
 
         .quick-action-btn:hover {
+            background: var(--color-primary-dark);
+            border-color: var(--color-primary-dark);
             transform: translateY(-1px);
-            box-shadow: 0 4px 12px rgba(96, 165, 250, 0.4);
+            box-shadow: 0 4px 12px rgba(96, 165, 250, 0.3);
         }
 
         .quick-action-btn.secondary {
-            background: var(--color-bg-tertiary);
-            color: var(--color-text-secondary);
+            background: transparent;
+            border: 1px solid var(--color-border);
+            color: var(--color-text-primary);
         }
 
         .quick-action-btn.secondary:hover {
-            background: var(--color-bg-secondary);
-            color: var(--color-text-primary);
+            background: var(--color-bg-tertiary);
+            border-color: var(--color-border-light);
             box-shadow: none;
         }
 
-        /* Status Bar */
+        /* Status Bar - Hidden (now part of chat) */
         .status-bar {
-            padding: 12px 20px;
-            border-bottom: 1px solid var(--color-border);
-            display: flex;
-            align-items: center;
-            gap: 8px;
-            font-size: 13px;
-            color: var(--color-text-secondary);
-            flex-shrink: 0;
-        }
-
-        .status-bar.hidden {
-            display: none;
-        }
-
-        .status-model {
-            color: var(--color-text-secondary);
-            font-weight: 500;
-        }
-
-        .status-divider {
-            color: var(--color-border);
-        }
-
-        .status-time {
-            color: var(--color-text-muted);
+            display: none !important;
         }
 
         /* Thinking Box */
         .thinking-box {
-            margin: 0 20px 16px;
-            padding: 14px 16px;
+            margin: 0 20px 12px;
+            padding: 10px 14px;
             background: var(--color-bg-secondary);
             border: 1px solid var(--color-border);
-            border-radius: var(--radius-md);
+            border-radius: var(--radius-sm);
             display: flex;
             align-items: center;
             justify-content: space-between;
             flex-shrink: 0;
+            cursor: pointer;
+            transition: all 0.2s ease;
+        }
+
+        .thinking-box:hover {
+            background: var(--color-bg-tertiary);
         }
 
         .thinking-box.hidden {
@@ -273,26 +256,35 @@
         .thinking-content {
             display: flex;
             align-items: center;
-            gap: 10px;
+            gap: 8px;
         }
 
         .thinking-icon {
-            width: 16px;
+            width: 12px;
             height: 2px;
             background: var(--color-text-muted);
             border-radius: 1px;
         }
 
+        .thinking-box.active .thinking-icon {
+            background: var(--color-primary);
+            animation: pulse 2s infinite;
+        }
+
         .thinking-text {
             color: var(--color-text-secondary);
-            font-size: 13px;
+            font-size: 12px;
+            font-weight: 400;
         }
 
         .thinking-chevron {
             color: var(--color-text-muted);
-            font-size: 12px;
-            cursor: pointer;
-            padding: 4px;
+            font-size: 10px;
+            transition: transform 0.2s ease;
+        }
+
+        .thinking-box.expanded .thinking-chevron {
+            transform: rotate(180deg);
         }
 
         /* Auth Section */
@@ -493,12 +485,31 @@
         .content-area {
             flex: 1;
             overflow-y: auto;
+            overflow-x: hidden;
             padding: 20px;
             min-height: 0;
+            background: var(--color-bg-primary);
         }
 
         .content-area.hidden {
             display: none;
+        }
+
+        .content-area::-webkit-scrollbar {
+            width: 8px;
+        }
+
+        .content-area::-webkit-scrollbar-track {
+            background: transparent;
+        }
+
+        .content-area::-webkit-scrollbar-thumb {
+            background: var(--color-border);
+            border-radius: 4px;
+        }
+
+        .content-area::-webkit-scrollbar-thumb:hover {
+            background: var(--color-border-light);
         }
 
         /* Input Section */
@@ -579,8 +590,8 @@
         }
 
         .submit-btn {
-            background: transparent;
-            border: none;
+            background: rgba(255, 255, 255, 0.05);
+            border: 1px solid var(--color-border);
             color: var(--color-text-muted);
             cursor: pointer;
             padding: 8px;
@@ -594,8 +605,9 @@
         }
 
         .submit-btn:hover:not(:disabled) {
-            background: var(--color-bg-tertiary);
+            background: rgba(255, 255, 255, 0.08);
             color: var(--color-text-primary);
+            border-color: var(--color-border-light);
         }
 
         .submit-btn:disabled {
@@ -604,8 +616,13 @@
         }
 
         .submit-btn svg {
-            width: 18px;
-            height: 18px;
+            width: 16px;
+            height: 16px;
+        }
+
+        .input-icon-btn:disabled {
+            opacity: 0.4;
+            cursor: not-allowed;
         }
 
         /* Scrollbars */
@@ -638,61 +655,217 @@
             gap: 16px;
         }
 
-        .message {
-            display: flex;
-            gap: 12px;
-            animation: messageSlideIn 0.3s ease-out;
-            align-items: flex-start;
+        /* User section in chat */
+        .chat-user-label {
+            font-size: 11px;
+            color: var(--color-text-secondary);
+            font-weight: 400;
+            margin-bottom: 8px;
+            text-transform: none;
+            letter-spacing: 0;
         }
 
-        .message.user {
-            flex-direction: row-reverse;
+        .chat-user-query {
+            font-size: 11px;
+            color: var(--color-text-primary);
+            line-height: 1.6;
+            font-weight: 400;
         }
 
-        .message-avatar {
-            width: 28px;
-            height: 28px;
-            border-radius: 50%;
+        /* Status bar in chat */
+        .chat-status-bar {
             display: flex;
             align-items: center;
-            justify-content: center;
-            font-size: 12px;
-            font-weight: 600;
-            flex-shrink: 0;
-            background: var(--color-bg-tertiary);
+            gap: 6px;
+            font-size: 10px;
             color: var(--color-text-secondary);
         }
 
-        .message.user .message-avatar {
-            background: var(--color-primary);
-            color: white;
+        .chat-status-bar .status-model {
+            color: var(--color-text-secondary);
+            font-weight: 400;
+            text-transform: none;
         }
 
-        .message.assistant .message-avatar {
-            background: var(--color-bg-tertiary);
-            color: var(--color-text-primary);
+        .chat-status-bar .status-divider {
+            color: var(--color-text-muted);
+            font-weight: 300;
+            font-size: 11px;
+        }
+
+        .chat-status-bar .status-time {
+            color: var(--color-text-secondary);
+            font-weight: 400;
+        }
+
+        .message {
+            display: flex;
+            animation: messageSlideIn 0.3s ease-out;
+            align-items: flex-start;
         }
 
         .message-content {
             background: transparent;
             padding: 0;
-            max-width: calc(100% - 44px);
+            width: 100%;
             word-wrap: break-word;
             position: relative;
         }
 
         .message-text {
-            font-size: 14px;
+            font-size: 11px;
             line-height: 1.6;
             margin: 0;
             color: var(--color-text-primary);
+            white-space: pre-wrap;
         }
 
         .message-time {
-            font-size: 11px;
+            font-size: 9px;
             color: var(--color-text-muted);
-            margin-top: 6px;
+            margin-top: 8px;
             display: block;
+        }
+
+        /* Tool Execution Results - Modern Design */
+        .message.tool-execution .message-content {
+            background: var(--color-bg-secondary);
+            border: none;
+            border-radius: var(--radius-sm);
+            padding: 12px 14px;
+        }
+
+        .tools-list {
+            display: flex;
+            flex-direction: column;
+            gap: 0;
+            margin: 0;
+        }
+
+        .tool-item {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            gap: 12px;
+            padding: 4px 0;
+            transition: all 0.2s ease;
+        }
+
+        .tool-item:first-child {
+            padding-top: 0;
+        }
+
+        .tool-item:last-child {
+            padding-bottom: 0;
+        }
+
+        .tool-item:hover {
+            opacity: 0.85;
+        }
+
+        .tool-info {
+            flex: 1;
+            min-width: 0;
+        }
+
+        .tool-name {
+            font-size: 10px;
+            font-weight: 400;
+            color: var(--color-text-secondary);
+            line-height: 1.5;
+            white-space: nowrap;
+            overflow: hidden;
+            text-overflow: ellipsis;
+        }
+
+        .tool-message {
+            display: none;
+        }
+
+        .tool-checkmark {
+            width: 14px;
+            height: 14px;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            flex-shrink: 0;
+        }
+
+        .tool-item.success .tool-checkmark {
+            background: var(--color-success);
+            color: white;
+        }
+
+        .tool-item.error .tool-checkmark {
+            background: var(--color-error);
+            color: white;
+        }
+
+        .tool-checkmark svg {
+            width: 8px;
+            height: 8px;
+        }
+
+        /* Message Actions */
+        .message-actions {
+            display: flex;
+            flex-direction: column;
+            gap: 12px;
+            margin-top: 12px;
+            padding-top: 0;
+            border-top: none;
+        }
+
+        .message-actions-row {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            gap: 24px;
+        }
+
+        .message-actions-right {
+            display: flex;
+            align-items: center;
+            gap: 24px;
+        }
+
+        .message-action-btn {
+            display: inline-flex;
+            align-items: center;
+            gap: 6px;
+            padding: 0;
+            margin: 0;
+            background: transparent;
+            border: none;
+            color: var(--color-text-primary);
+            font-size: 11px;
+            font-weight: 300;
+            cursor: pointer;
+            transition: all 0.2s ease;
+            white-space: nowrap;
+            opacity: 0.7;
+        }
+
+        .message-action-btn:hover {
+            opacity: 1;
+        }
+
+        .message-action-btn svg {
+            width: 14px;
+            height: 14px;
+            flex-shrink: 0;
+        }
+
+        .message-action-btn.icon-only {
+            padding: 0;
+            min-width: auto;
+        }
+
+        .message-vote-btns {
+            display: flex;
+            align-items: center;
+            gap: 8px;
         }
 
         @keyframes messageSlideIn {
@@ -973,27 +1146,17 @@
             <div class="user-prompt-section hidden" id="userPromptSection">
                 <div class="user-label">User</div>
                 <div class="user-query" id="userQuery"></div>
-                <div class="quick-actions" id="quickActions">
-                    <button class="quick-action-btn" onclick="executeCurrentPrompt()">
-                        <span>⚡</span>
-                        <span>Execute prompt</span>
-                    </button>
-                    <button class="quick-action-btn secondary" onclick="generateImages()">
-                        <span>🖼️</span>
-                        <span>Generate images</span>
-                    </button>
-                </div>
             </div>
 
             <!-- Status Bar -->
             <div class="status-bar hidden" id="statusBar">
-                <span class="status-model">CADZERO AI</span>
+                <span class="status-model">CADZERO</span>
                 <span class="status-divider">•</span>
                 <span class="status-time" id="statusTime">Ready</span>
             </div>
 
             <!-- Thinking Box -->
-            <div class="thinking-box hidden" id="thinkingBox">
+            <div class="thinking-box hidden" id="thinkingBox" onclick="toggleThinkingBox()">
                 <div class="thinking-content">
                     <div class="thinking-icon"></div>
                     <span class="thinking-text">Thinking...</span>
@@ -1009,30 +1172,32 @@
             <!-- Input Section -->
             <div class="input-section">
                 <div class="input-container">
-                    <input type="text" class="input-field" id="userInput" placeholder="Make changes, add new features, ask for anything">
+                    <input type="text" class="input-field" id="userInput" placeholder="Make changes, add new features, ask for anything" onkeydown="if(event.keyCode === 13 || event.key === 'Enter') { event.preventDefault(); submit(); }">
                     <div class="input-actions">
-                        <button class="input-icon-btn" title="Commands">
+                        <button class="input-icon-btn" title="AI Assistant" disabled>
                             <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-                                <line x1="4" y1="9" x2="20" y2="9"></line>
-                                <line x1="4" y1="15" x2="14" y2="15"></line>
+                                <path d="M12 2l3 7h7l-6 5 3 8-7-5-7 5 3-8-6-5h7l3-7z"></path>
+                                <line x1="2" y1="22" x2="22" y2="2" stroke-width="2"></line>
                             </svg>
                         </button>
-                        <button class="input-icon-btn" title="Voice input">
+                        <button class="input-icon-btn" title="Voice input" disabled>
                             <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
                                 <path d="M12 1a3 3 0 0 0-3 3v8a3 3 0 0 0 6 0V4a3 3 0 0 0-3-3z"></path>
                                 <path d="M19 10v2a7 7 0 0 1-14 0v-2M12 19v4M8 23h8"></path>
                             </svg>
                         </button>
-                        <button class="input-icon-btn" title="Attachments">
+                        <button class="input-icon-btn" title="Add attachment" disabled>
                             <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-                                <line x1="12" y1="5" x2="12" y2="19"></line>
-                                <line x1="5" y1="12" x2="19" y2="12"></line>
+                                <circle cx="12" cy="12" r="10"></circle>
+                                <line x1="12" y1="8" x2="12" y2="16"></line>
+                                <line x1="8" y1="12" x2="16" y2="12"></line>
                             </svg>
                         </button>
-                        <button class="submit-btn" id="submitBtn" onclick="submit()" title="Send">
+                        <button class="submit-btn" id="submitBtn" onclick="submit()" title="Send" disabled>
                             <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-                                <rect x="3" y="3" width="18" height="18" rx="2"></rect>
-                                <circle cx="12" cy="12" r="3"></circle>
+                                <rect x="3" y="3" width="18" height="18" rx="4" ry="4"></rect>
+                                <polyline points="12 8 12 16"></polyline>
+                                <polyline points="8 12 12 8 16 12"></polyline>
                             </svg>
                         </button>
                     </div>
