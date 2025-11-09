@@ -9,6 +9,7 @@ import webbrowser
 import http.server
 import socketserver
 import urllib.parse
+import time
 from threading import Thread
 from . import config
 
@@ -21,6 +22,8 @@ class AuthToken:
         self.user_id = None
         self.user_email = None
         self.user_name = None
+        self.session_id = None  # Store session ID for token refresh
+        self.token_expiry = None  # Track when token expires
         self._token_file = os.path.join(
             os.path.dirname(__file__), 
             '.auth_token.json'
@@ -37,22 +40,90 @@ class AuthToken:
                     self.user_id = data.get('user_id')
                     self.user_email = data.get('user_email')
                     self.user_name = data.get('user_name')
+                    self.session_id = data.get('session_id')
+                    
+                    # Always decode JWT to get real expiry (in case token was saved with wrong expiry)
+                    if self.token:
+                        decoded_expiry = self._decode_jwt_expiry(self.token)
+                        if decoded_expiry:
+                            self.token_expiry = decoded_expiry
+                            remaining_minutes = int((decoded_expiry - time.time()) / 60)
+                            if remaining_minutes > 0:
+                                print(f"[AUTH] Token loaded, expires in ~{remaining_minutes} minutes")
+                            else:
+                                print(f"[AUTH] Token loaded but already expired")
+                        else:
+                            # Fallback to saved expiry if we can't decode
+                            self.token_expiry = data.get('token_expiry')
+                    else:
+                        self.token_expiry = data.get('token_expiry')
         except Exception as e:
             print(f"Error loading auth token: {e}")
     
-    def save_token(self, token, user_id=None, user_email=None, user_name=None):
+    def _decode_jwt_expiry(self, token):
+        """
+        Extract the expiry time from a JWT token without verification.
+        Returns the expiry timestamp or None if unable to decode.
+        """
+        try:
+            # JWT tokens have 3 parts separated by dots: header.payload.signature
+            parts = token.split('.')
+            if len(parts) != 3:
+                return None
+            
+            # Decode the payload (second part)
+            # Add padding if needed (JWT base64 encoding might not have padding)
+            payload = parts[1]
+            padding = 4 - len(payload) % 4
+            if padding != 4:
+                payload += '=' * padding
+            
+            # Decode from base64
+            import base64
+            decoded_bytes = base64.urlsafe_b64decode(payload)
+            payload_data = json.loads(decoded_bytes)
+            
+            # Get the 'exp' claim (expiration time as Unix timestamp)
+            exp = payload_data.get('exp')
+            if exp:
+                # Subtract 30 seconds as a buffer to refresh before actual expiry
+                return exp - 30
+            
+            return None
+        except Exception as e:
+            print(f"[AUTH] Unable to decode JWT expiry: {e}")
+            return None
+    
+    def save_token(self, token, user_id=None, user_email=None, user_name=None, session_id=None, token_expiry=None):
         """Save token to file"""
         try:
             self.token = token
             self.user_id = user_id
             self.user_email = user_email
             self.user_name = user_name
+            self.session_id = session_id
+            
+            # If token_expiry not provided, try to decode it from the JWT token
+            if token_expiry is None and token:
+                decoded_expiry = self._decode_jwt_expiry(token)
+                if decoded_expiry:
+                    self.token_expiry = decoded_expiry
+                    expiry_minutes = int((decoded_expiry - time.time()) / 60)
+                    print(f"[AUTH] Token will expire in ~{expiry_minutes} minutes")
+                else:
+                    # Fallback: assume 15 minutes (if Clerk Dashboard is configured correctly)
+                    self.token_expiry = time.time() + (15 * 60) - 30  # 15 min minus 30 sec buffer
+                    print(f"[AUTH] Using default 15-minute token expiry")
+            else:
+                self.token_expiry = token_expiry
             
             data = {
                 'token': token,
                 'user_id': user_id,
                 'user_email': user_email,
-                'user_name': user_name
+                'user_name': user_name,
+                'session_id': session_id,
+                'token_expiry': self.token_expiry
             }
             
             with open(self._token_file, 'w') as f:
@@ -66,6 +137,8 @@ class AuthToken:
         self.user_id = None
         self.user_email = None
         self.user_name = None
+        self.session_id = None
+        self.token_expiry = None
         
         try:
             if os.path.exists(self._token_file):
@@ -73,13 +146,49 @@ class AuthToken:
         except Exception as e:
             print(f"Error clearing auth token: {e}")
     
+    def is_token_expired(self):
+        """Check if the current token is expired or about to expire"""
+        if self.token_expiry is None:
+            return True
+        return time.time() >= self.token_expiry
+    
+    def refresh_token(self):
+        """
+        Refresh the session token using the session ID.
+        
+        NOTE: Automatic token refresh is currently disabled. 
+        With the extended token lifetime (15 minutes) configured in Clerk Dashboard,
+        users should not need to refresh tokens during normal usage.
+        If the token expires, users will need to re-authenticate.
+        """
+        if not self.session_id:
+            print("[AUTH] No session ID available for token refresh")
+            return False
+        
+        print("[AUTH] Token refresh requested but automatic refresh is disabled.")
+        print("[AUTH] Please extend token lifetime in Clerk Dashboard (recommended: 15 minutes)")
+        print("[AUTH] User will need to re-authenticate through the web flow.")
+        return False
+    
     def is_authenticated(self):
         """Check if user is authenticated"""
-        return self.token is not None
+        if self.token is None:
+            return False
+        
+        # Check if token is expired
+        # NOTE: We don't automatically refresh here anymore to avoid breaking the add-in
+        # With extended token lifetime (15 min), this should rarely be an issue
+        if self.is_token_expired():
+            print("[AUTH] Token expired. Please re-authenticate.")
+            print("[AUTH] Tip: Increase token lifetime in Clerk Dashboard to reduce re-authentication frequency")
+            return False
+        
+        return True
     
     def get_auth_header(self):
         """Get the Authorization header for API requests"""
-        if self.token:
+        # Ensure token is valid before returning
+        if self.is_authenticated():
             return {'Authorization': f'Bearer {self.token}'}
         return {}
 
@@ -108,7 +217,8 @@ class CallbackHandler(http.server.SimpleHTTPRequestHandler):
             'token': params.get('token', [None])[0],
             'user_id': params.get('user_id', [None])[0],
             'user_email': params.get('user_email', [None])[0],
-            'user_name': params.get('user_name', [None])[0]
+            'user_name': params.get('user_name', [None])[0],
+            'session_id': params.get('session_id', [None])[0]
         }
         
         # Debug log the token
@@ -266,7 +376,8 @@ def initiate_clerk_signin():
             token=callback_data['token'],
             user_id=callback_data.get('user_id'),
             user_email=callback_data.get('user_email'),
-            user_name=callback_data.get('user_name')
+            user_name=callback_data.get('user_name'),
+            session_id=callback_data.get('session_id')
         )
         print(f"[AUTH] Authentication successful for: {callback_data.get('user_email')}")
         return True

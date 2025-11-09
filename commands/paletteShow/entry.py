@@ -21,11 +21,11 @@ def get_backend_url():
 
 def get_chat_endpoint():
     """Get the current chat endpoint"""
-    return f"{get_backend_url()}/llm/openai/chat-with-tools"
+    return f"{get_backend_url()}/llm/chat-with-tools"
 
 # CADZERO Palette Configuration
 CMD_ID = f'{config.COMPANY_NAME}_{config.ADDIN_NAME}_PalleteShow'
-CMD_NAME = 'CADZERO AI'
+CMD_NAME = 'CADZERO Chat'
 CMD_Description = 'AI-Powered Fusion 360 Assistant'
 PALETTE_NAME = 'CADZERO'
 IS_PROMOTED = False
@@ -640,6 +640,7 @@ def send_chat_message(message, history=None):
         
         # Prepare the data to send in the new format
         data = {
+            'provider': 'openai',
             'message': message,
             'tool_choice': 'auto',
             'max_tool_calls': 5

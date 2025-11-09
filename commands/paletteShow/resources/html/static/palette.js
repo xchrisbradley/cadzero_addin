@@ -170,7 +170,7 @@ function addStatusMessage(status = 'Complete', elapsed = null) {
     
     const statusModel = document.createElement('span');
     statusModel.className = 'status-model';
-    statusModel.textContent = 'CADZERO AI';
+    statusModel.textContent = 'CADZERO 1.0 Pro';
     
     const statusDivider = document.createElement('span');
     statusDivider.className = 'status-divider';
@@ -335,7 +335,7 @@ function submit() {
     
     // Check if user is authenticated
     if (!authState.isAuthenticated) {
-        addMessage('⚠️ Please sign in to use CADZERO AI', false);
+        addMessage('⚠️ Please sign in to use CADZERO Chat', false);
         return;
     }
     
@@ -899,7 +899,7 @@ function startAuthCallback() {
 
 // Initialize
 window.addEventListener('load', function() {
-    console.log('CADZERO AI initializing...');
+    console.log('CADZERO initializing...');
     
     // Load settings
     loadSettings();
@@ -937,7 +937,7 @@ window.addEventListener('load', function() {
     // Initialize debug sections
     updateDebugSections();
     
-    console.log('CADZERO AI initialization complete');
+    console.log('CADZERO initialization complete');
 });
 
 // Endpoint management
@@ -1206,7 +1206,7 @@ function hideAuthLoadingState() {
     if (authStatus) {
         authStatus.innerHTML = `
             <div class="auth-welcome">
-                <div class="auth-welcome-title">🔐 Welcome to CADZERO AI</div>
+                <div class="auth-welcome-title">🔐 Welcome to CADZERO</div>
                 <div class="auth-welcome-subtitle">Sign in to start using AI-powered CAD assistance</div>
             </div>
         `;
