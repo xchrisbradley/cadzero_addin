@@ -56,7 +56,7 @@ That's it! The add-in connects to our cloud service automatically. **No coding, 
 ### 🎫 Alpha Testing Access
 
 For this week's alpha test:
-- **Sign up at:** [staging.cadzero.xyz](https://staging.cadzero.xyz)
+- **Sign up at:** [staging.cadzero.xyz](https://staging.cadzero.xyz/sign-up)
 - **Test payment card:** `4242 4242 4242 4242`
   - Any future expiry date (e.g., 12/34)
   - Any 3-digit CVC (e.g., 123)
