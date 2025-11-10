@@ -23,21 +23,25 @@ sample_palette_id = f'{COMPANY_NAME}_{ADDIN_NAME}_palette_id'
 # Backend API Endpoints
 LOCAL_ENDPOINT = 'http://localhost:4000'
 STAGING_ENDPOINT = 'https://staging-utilities-c8p2.encr.app'
+PRODUCTION_ENDPOINT = 'https://production-utilities-c8p2.encr.app'
 
 # Current endpoint (defaults to local)
-current_endpoint = LOCAL_ENDPOINT
+current_endpoint = STAGING_ENDPOINT
 
 # Clerk Authentication Configuration
-CLERK_PUBLISHABLE_KEY = 'pk_test_dXAtcm9vc3Rlci01Mi5jbGVyay5hY2NvdW50cy5kZXYk'  # Replace with your actual key
+CLERK_PUBLISHABLE_KEY = 'pk_test_ZGlzdGluY3QtcGlyYW5oYS04My5jbGVyay5hY2NvdW50cy5kZXYk'  # Replace with your actual key
 CLERK_SIGN_IN_URL_LOCAL = 'http://localhost:5173/sign-in'  # Your local frontend sign-in URL
-CLERK_SIGN_IN_URL_STAGING = 'https://your-staging-frontend.com/sign-in'  # Your staging frontend sign-in URL
+CLERK_SIGN_IN_URL_STAGING = 'https://staging.cadzero.xyz/sign-in'  # Staging frontend sign-in URL
+CLERK_SIGN_IN_URL_PRODUCTION = 'https://www.cadzero.xyz/sign-in'  # Production frontend sign-in URL
 
 def get_auth_url():
     """Get the appropriate authentication URL based on current endpoint"""
     # Add callback URL parameter for local callback server
     callback_url = 'http://localhost:8765/'
     
-    if current_endpoint == STAGING_ENDPOINT:
+    if current_endpoint == PRODUCTION_ENDPOINT:
+        base_url = CLERK_SIGN_IN_URL_PRODUCTION
+    elif current_endpoint == STAGING_ENDPOINT:
         base_url = CLERK_SIGN_IN_URL_STAGING
     else:
         base_url = CLERK_SIGN_IN_URL_LOCAL
