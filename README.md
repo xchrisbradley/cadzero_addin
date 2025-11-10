@@ -48,7 +48,7 @@ Transform your Fusion 360 experience with AI. CADZERO brings intelligent CAD ass
 
 - ✅ **Autodesk Fusion 360** (latest version recommended)
 - ✅ **Internet connection** for AI processing  
-- ✅ **CADZERO account** - [Sign up at staging.cadzero.xyz](https://staging.cadzero.xyz) *(alpha testing)*
+- ✅ **CADZERO account** - [Sign up at staging.cadzero.xyz](https://staging.cadzero.xyz/sign-up) *(alpha testing)*
 - ✅ **Windows, macOS, or Linux**
 
 That's it! The add-in connects to our cloud service automatically. **No coding, no servers, no technical setup** - just install and start designing with AI.
