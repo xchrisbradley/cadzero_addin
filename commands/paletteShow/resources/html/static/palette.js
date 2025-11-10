@@ -109,6 +109,7 @@ function toggleDebugContent(sectionId) {
 // Chat management
 function addMessage(content, isUser = false, timestamp = null, addActions = false) {
     const chatMessages = document.getElementById('chatMessages');
+    const contentArea = document.getElementById('contentArea');
     const messageDiv = document.createElement('div');
     messageDiv.className = `message ${isUser ? 'user' : 'assistant'}`;
     
@@ -134,12 +135,13 @@ function addMessage(content, isUser = false, timestamp = null, addActions = fals
         addMessageActions(messageDiv);
     }
     
-    scrollToBottom(chatMessages);
+    scrollToBottom(contentArea);
 }
 
 // Add user message with special styling
 function addUserMessage(content) {
     const chatMessages = document.getElementById('chatMessages');
+    const contentArea = document.getElementById('contentArea');
     
     // Create user prompt section
     const userSection = document.createElement('div');
@@ -157,12 +159,13 @@ function addUserMessage(content) {
     userSection.appendChild(userQuery);
     chatMessages.appendChild(userSection);
     
-    scrollToBottom(chatMessages);
+    scrollToBottom(contentArea);
 }
 
 // Add status bar message
 function addStatusMessage(status = 'Complete', elapsed = null) {
     const chatMessages = document.getElementById('chatMessages');
+    const contentArea = document.getElementById('contentArea');
     
     const statusDiv = document.createElement('div');
     statusDiv.className = 'chat-status-bar';
@@ -185,7 +188,7 @@ function addStatusMessage(status = 'Complete', elapsed = null) {
     statusDiv.appendChild(statusText);
     
     chatMessages.appendChild(statusDiv);
-    scrollToBottom(chatMessages);
+    scrollToBottom(contentArea);
 }
 
 // Update status message
@@ -560,6 +563,7 @@ function displayChatResponse(response) {
 // Add tool execution results with modern checkmark design
 function addToolExecutionResults(executionResults) {
     const chatMessages = document.getElementById('chatMessages');
+    const contentArea = document.getElementById('contentArea');
     const messageDiv = document.createElement('div');
     messageDiv.className = 'message assistant tool-execution';
     
@@ -601,7 +605,7 @@ function addToolExecutionResults(executionResults) {
     messageDiv.appendChild(messageContent);
     
     chatMessages.appendChild(messageDiv);
-    scrollToBottom(chatMessages);
+    scrollToBottom(contentArea);
 }
 
 // Add action buttons to a message
@@ -688,10 +692,79 @@ function addMessageActions(messageDiv) {
 }
 
 function scrollToBottom(element) {
+    if (!element) {
+        console.warn('scrollToBottom: element is null or undefined');
+        return;
+    }
+    
     // Use requestAnimationFrame for smooth scrolling
+    // Double requestAnimationFrame ensures DOM has fully updated
     requestAnimationFrame(() => {
-        element.scrollTop = element.scrollHeight;
+        requestAnimationFrame(() => {
+            const scrollHeight = element.scrollHeight;
+            const clientHeight = element.clientHeight;
+            const maxScrollTop = scrollHeight - clientHeight;
+            
+            console.log(`Scrolling to bottom: scrollHeight=${scrollHeight}, clientHeight=${clientHeight}, maxScrollTop=${maxScrollTop}`);
+            
+            // Set scroll position to maximum (instant method)
+            element.scrollTop = maxScrollTop;
+            
+            // Also try smooth scroll behavior
+            element.scrollTo({
+                top: maxScrollTop,
+                behavior: 'smooth'
+            });
+        });
     });
+}
+
+// Auto-scroll observer to handle dynamic content changes
+let autoScrollTimer = null;
+function setupAutoScroll() {
+    const chatMessages = document.getElementById('chatMessages');
+    const contentArea = document.getElementById('contentArea');
+    
+    if (!chatMessages || !contentArea) return;
+    
+    // Create a MutationObserver to watch for new messages
+    const observer = new MutationObserver((mutations) => {
+        // Debounce multiple rapid changes
+        if (autoScrollTimer) {
+            clearTimeout(autoScrollTimer);
+        }
+        
+        autoScrollTimer = setTimeout(() => {
+            // Check if any actual content was added
+            let hasNewContent = false;
+            mutations.forEach((mutation) => {
+                if (mutation.type === 'childList' && mutation.addedNodes.length > 0) {
+                    hasNewContent = true;
+                }
+            });
+            
+            if (hasNewContent) {
+                // New content added, scroll to bottom with a slight delay
+                // to ensure content is fully rendered
+                scrollToBottom(contentArea);
+                
+                // Force scroll again after a short delay to catch any delayed renders
+                setTimeout(() => {
+                    scrollToBottom(contentArea);
+                }, 100);
+            }
+        }, 50);
+    });
+    
+    // Start observing the chat messages container
+    observer.observe(chatMessages, {
+        childList: true,
+        subtree: true,
+        characterData: true
+    });
+    
+    console.log('Auto-scroll observer initialized');
+    return observer;
 }
 
 function closeWindow() {
@@ -906,6 +979,9 @@ window.addEventListener('load', function() {
     
     // Check authentication status
     checkAuthStatus();
+    
+    // Setup auto-scroll for chat messages
+    setupAutoScroll();
     
     // Add debug log
     addDebugLog('Application initialized');
