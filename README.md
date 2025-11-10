@@ -73,7 +73,7 @@ For this week's alpha test:
 
 **Option B: Via Git**
 ```bash
-git clone https://github.com/xchrisbradley/nationdevs.git
+git clone https://github.com/xchrisbradley/cadzero_addin.git
 ```
 
 ### 2️⃣ Install in Fusion 360
