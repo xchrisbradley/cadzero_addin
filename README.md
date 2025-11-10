@@ -1,6 +1,6 @@
-# CADZERO - AI-Powered Fusion 360 Add-In
+# CADZERO - AI-Powered CAD Assistant for Fusion 360
 
-CADZERO is an intelligent add-in for Autodesk Fusion 360 that brings AI-powered CAD assistance directly into your modeling workflow. Create complex designs, automate repetitive tasks, and get instant help with natural language commands.
+Transform your Fusion 360 experience with AI. CADZERO brings intelligent CAD assistance directly into your modeling workflow - just describe what you want to create and watch it come to life. No coding required, no technical setup, just install and start designing.
 
 ## 🎬 Demo
 
@@ -29,66 +29,55 @@ CADZERO is an intelligent add-in for Autodesk Fusion 360 that brings AI-powered 
 - Get suggestions and best practices
 - Learn Fusion 360 API through examples
 
-## 📋 Requirements
+## 📋 What You Need
 
-### Fusion 360
-- Autodesk Fusion 360 (latest version recommended)
-- Windows, macOS, or Linux
+- ✅ **Autodesk Fusion 360** (latest version recommended)
+- ✅ **Internet connection** for AI processing  
+- ✅ **CADZERO account** - [Sign up free](https://www.cadzero.xyz) to get started
+- ✅ **Windows, macOS, or Linux**
 
-### Backend Services
-- **Encore Backend** running locally or deployed
-  - Authentication service
-  - LLM Router service
-  - Accounts service
+That's it! The add-in connects to our cloud service automatically. **No coding, no servers, no technical setup** - just install and start designing with AI.
 
-### Authentication
-- Valid account credentials from the platform
-- Internet connection for API calls
+## 🚀 Quick Start
 
-## 🚀 Installation
+### 1️⃣ Download CADZERO
 
-### Step 1: Download the Add-In
+**Option A: Direct Download**
+- Download the CADZERO folder from our releases page
+- Extract to a location you'll remember (e.g., `Documents/Fusion360AddIns/`)
 
-Clone or download this repository:
-
+**Option B: Via Git**
 ```bash
-git clone https://github.com/yourusername/nationdevs.git
-cd nationdevs/addins/CADZERO
+git clone https://github.com/xchrisbradley/nationdevs.git
 ```
 
-### Step 2: Install in Fusion 360
+### 2️⃣ Install in Fusion 360
 
-1. **Open Fusion 360**
-2. Go to **UTILITIES** tab in the toolbar
-3. Click **ADD-INS** button
-4. In the Add-Ins dialog, click the **Add-Ins** tab
-5. Click the **+** (plus) button next to "My Add-Ins"
-6. Navigate to the `nationdevs/addins/CADZERO` folder
-7. Select the folder and click **Open**
-8. The add-in should now appear in the list
-9. Click **Run** to start CADZERO
+1. Open **Fusion 360**
+2. Click the **UTILITIES** tab in the toolbar
+3. Click **ADD-INS**
+4. In the Add-Ins window, click the **Add-Ins** tab
+5. Click the **green + button** next to "My Add-Ins"
+6. Browse to and select the **CADZERO** folder
+7. Click **OK**
+8. Find **CADZERO** in the list and click **Run**
 
-### Step 3: Configure Backend Connection
+### 3️⃣ Sign In
 
-Edit `config.py` to set your backend endpoints:
+1. The CADZERO palette will appear on the right side
+2. Click the **Sign In** button
+3. Your browser will open - sign in with your CADZERO account
+   - Don't have an account? Sign up at [www.cadzero.xyz](https://www.cadzero.xyz)
+4. Return to Fusion 360 - you're all set!
 
-```python
-# config.py
-ENDPOINTS = {
-    'local': 'http://localhost:4000',
-    'staging': 'https://your-staging-url.com'
-}
+### 4️⃣ Start Creating
 
-# Default endpoint
-DEFAULT_ENDPOINT = 'local'  # or 'staging'
+Type your first command in the chat:
+```
+Create a 10cm diameter circle sketch
 ```
 
-### Step 4: Sign In
-
-1. When the palette opens, click **Sign In**
-2. A browser window will open (or copy the provided link)
-3. Complete authentication in your browser
-4. Return to Fusion 360 - you're ready to go!
+Watch CADZERO bring your idea to life! 🎉
 
 ## 🎨 Usage
 
@@ -131,144 +120,97 @@ Add a 0.5cm fillet to all edges
   - **Restore checkpoint** - Undo to saved state
   - 👍👎 - Provide feedback
 
-## 🛠️ Development Setup
-
-### Project Structure
-
-```
-CADZERO/
-├── CADZERO.py              # Main add-in entry point
-├── CADZERO.manifest        # Add-in manifest
-├── auth.py                 # Authentication handler
-├── config.py               # Configuration settings
-├── commands/
-│   ├── commandDialog/      # Command dialog (legacy)
-│   ├── paletteSend/        # Send command handler
-│   └── paletteShow/        # Main palette UI
-│       └── resources/
-│           └── html/
-│               ├── index.html      # Main UI
-│               └── static/
-│                   └── palette.js  # Frontend logic
-└── lib/
-    └── fusionAddInUtils/   # Utility functions
-```
-
-### Running Backend Services
-
-Make sure the Encore backend is running:
-
-```bash
-cd utilities
-encore run
-```
-
-This starts:
-- Auth service (port 4000)
-- LLM Router
-- Accounts service
-- All required APIs
-
-### Debugging
-
-1. **Fusion 360 Text Commands**:
-   - Enable in Fusion: **UTILITIES** > **ADD-INS** > **Scripts and Add-Ins** > **Text Commands**
-   
-2. **Browser DevTools**:
-   - Right-click in the palette (if supported)
-   - Or check Fusion's console output
-
-3. **Python Logs**:
-   - Check Fusion 360's Text Commands panel for Python errors
-   - Use `app.log()` for debugging
-
-## 🔧 Configuration
-
-### Switching Endpoints
-
-Toggle between local and staging in the palette settings, or edit `config.py`:
-
-```python
-# For local development
-DEFAULT_ENDPOINT = 'local'
-
-# For production/staging
-DEFAULT_ENDPOINT = 'staging'
-```
-
-### Authentication Token
-
-The auth token is stored in:
-```
-.auth_token.json
-```
-
-**Note**: This file is in `.gitignore` - never commit it!
-
-## 🐛 Troubleshooting
-
-### "Fusion API not available"
-- Make sure you're running CADZERO from within Fusion 360
-- Restart Fusion 360 and reload the add-in
-
-### "Authentication failed"
-- Check that backend services are running
-- Verify your credentials
-- Clear `.auth_token.json` and sign in again
-
-### "Tool execution failed"
-- Ensure you have an active document open
-- Check that the command is valid for your current context
-- Review the execution log in the debug section
-
-### Palette not showing
-- Go to UTILITIES > ADD-INS and click "Run" on CADZERO
-- Check if the palette is hidden off-screen
-- Restart Fusion 360
 
 ## 📝 Best Practices
 
-1. **Be Specific** - Provide dimensions and details in your commands
-2. **One Step at a Time** - Break complex designs into smaller commands
-3. **Check Results** - Review tool execution results before proceeding
-4. **Use Checkpoints** - Save states before major operations
-5. **Provide Feedback** - Use 👍👎 to help improve the AI
+1. **Be Specific** - Include dimensions, quantities, and details in your commands
+2. **One Step at a Time** - Break complex designs into smaller, manageable commands
+3. **Check Results** - Review the tool execution feedback before proceeding
+4. **Use Checkpoints** - Save your work state before major operations
+5. **Provide Feedback** - Use 👍👎 buttons to help improve CADZERO
+6. **Start Fresh** - Create a new component for best results
+7. **Clear Communication** - Describe what you want, not how to do it
 
-## 🤝 Contributing
+## 🐛 Troubleshooting
 
-Contributions are welcome! Please:
+### Can't see the CADZERO palette
+- Go to **UTILITIES** > **ADD-INS** and click **Run** next to CADZERO
+- Check if the palette is hidden off-screen (drag it back into view)
+- Try restarting Fusion 360
 
-1. Fork the repository
-2. Create a feature branch
-3. Make your changes
-4. Test thoroughly in Fusion 360
-5. Submit a pull request
+### Authentication issues
+- Make sure you have an active internet connection
+- Verify your credentials at [www.cadzero.xyz](https://www.cadzero.xyz)
+- Click **Sign Out** then **Sign In** again to refresh your session
 
-## 📄 License
+### Commands not working
+- Ensure you have an **active document** open in Fusion 360
+- Start with a **new component** for best results
+- Make sure your command is specific (include dimensions and details)
+- Check the tool execution results for error messages
 
-[Your License Here]
+### Add-in won't load
+- Make sure you selected the **CADZERO folder** (not a parent folder)
+- Check that all files are present (don't rename files)
+- Restart Fusion 360 and try again
+- Still stuck? Contact support at chris@nationdevs.com
 
-## 🔗 Links
+## 💡 Need Help?
 
-- [Documentation](https://your-docs-url.com)
-- [Issues](https://github.com/yourusername/nationdevs/issues)
-- [Fusion 360 API Reference](https://help.autodesk.com/view/fusion360/ENU/?guid=GUID-A92A4B10-3781-4925-94C6-47DA85A4F65A)
+**📧 Email Support:** chris@nationdevs.com  
+**🌐 Website:** [www.cadzero.xyz](https://www.cadzero.xyz)  
+**📖 Full Documentation:** [docs.cadzero.xyz](https://www.cadzero.xyz)  
+**🐛 Report Issues:** [GitHub Issues](https://github.com/xchrisbradley/nationdevs/issues)
 
-## 💡 Support
+## 🎓 Learn More
 
-For help and support:
-- Open an issue on GitHub
-- Check the documentation
-- Contact: chris@nationdevs.com
+- [Video Tutorials](https://www.cadzero.xyz) - Watch CADZERO in action
+- [Example Commands](https://www.cadzero.xyz) - Get inspiration for your projects
+- [Best Practices Guide](https://www.cadzero.xyz) - Master CADZERO
+- [Community Forum](https://www.cadzero.xyz) - Connect with other users
 
-## 🙏 Acknowledgments
+## ⭐ Enjoy CADZERO?
 
-- Built with Autodesk Fusion 360 API
-- Backend powered by Encore
-- UI inspired by modern AI chat interfaces
-- LLM integration for intelligent CAD assistance
+- Leave us a ⭐ on [GitHub](https://github.com/xchrisbradley/nationdevs)
+- Share your creations with #CADZERO
+- Tell your colleagues about AI-powered CAD
 
 ---
 
-Made with ❤️ by NationDevs
+## 👨‍💻 For Developers
+
+<details>
+<summary>Click to expand developer documentation</summary>
+
+### Project Structure
+```
+CADZERO/
+├── CADZERO.py              # Main entry point
+├── CADZERO.manifest        # Add-in manifest
+├── auth.py                 # Authentication
+├── config.py               # Configuration
+├── commands/               # Command handlers
+└── lib/                    # Utilities
+```
+
+### Local Development
+To run with local backend:
+1. Edit `config.py`:
+   ```python
+   current_endpoint = LOCAL_ENDPOINT
+   ```
+2. Start local Encore backend:
+   ```bash
+   cd utilities && encore run
+   ```
+
+### Contributing
+Contributions welcome! Fork, create a feature branch, test thoroughly, and submit a PR.
+
+</details>
+
+---
+
+Made with ❤️ by **Nation Developers**  
+*Empowering designers with AI*
 
