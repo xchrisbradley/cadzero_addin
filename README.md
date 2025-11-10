@@ -4,7 +4,8 @@ CADZERO is an intelligent add-in for Autodesk Fusion 360 that brings AI-powered 
 
 ## 🎬 Demo
 
-![CADZERO Demo](./demo/cadzero-demo.gif)
+![CADZERO Demo1](./demo/cadzero-demo-1.gif)
+![CADZERO Demo2](./demo/cadzero-demo-2.gif)
 
 *Create complex CAD models using natural language - watch CADZERO in action!*
 
