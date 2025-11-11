@@ -1,19 +1,25 @@
 # CADZERO - AI-Powered CAD Assistant for Fusion 360
 
-> **🧪 ALPHA RELEASE - This Week Only**  
-> We're testing CADZERO in production this week! Help us QA and get early access to AI-powered CAD design.
+> **🚀 LIVE NOW**  
+> CADZERO is now available for production use! Sign up at [www.cadzero.xyz](https://www.cadzero.xyz) and start designing with AI.
 
 Transform your Fusion 360 experience with AI. CADZERO brings intelligent CAD assistance directly into your modeling workflow - just describe what you want to create and watch it come to life. No coding required, no technical setup, just install and start designing.
 
-## 🧪 Alpha Testing
+## 🌐 Environments
 
-**This week we're running an alpha test!** We need your help to QA CADZERO before the official launch.
+CADZERO is available in two environments:
 
-**What to expect:**
-- ✨ Full access to AI-powered CAD features
-- 🐛 Potential bugs and rough edges (please report them!)
-- 🎫 Free access with test Stripe card
-- 💬 Direct support from the development team
+**Production (Live):**
+- 🌐 Sign up at [www.cadzero.xyz](https://www.cadzero.xyz)
+- 💳 Real subscriptions and billing
+- ⚡ Stable, production-ready features
+- 🔒 Secure and reliable
+
+**Staging (Testing):**
+- 🧪 Test environment at [staging.cadzero.xyz](https://staging.cadzero.xyz)
+- 🎫 Use test card: `4242 4242 4242 4242`
+- 🐛 Help us test new features
+- 💬 Direct developer support
 
 **Your feedback matters!** Report bugs, suggest features, and help us make CADZERO amazing.
 
@@ -48,20 +54,25 @@ Transform your Fusion 360 experience with AI. CADZERO brings intelligent CAD ass
 
 - ✅ **Autodesk Fusion 360** (latest version recommended)
 - ✅ **Internet connection** for AI processing  
-- ✅ **CADZERO account** - [Sign up at staging.cadzero.xyz](https://staging.cadzero.xyz/sign-up) *(alpha testing)*
+- ✅ **CADZERO account** - [Sign up at www.cadzero.xyz](https://www.cadzero.xyz/sign-up)
 - ✅ **Windows, macOS, or Linux**
 
 That's it! The add-in connects to our cloud service automatically. **No coding, no servers, no technical setup** - just install and start designing with AI.
 
-### 🎫 Alpha Testing Access
+### 🎫 Getting Started
 
-For this week's alpha test:
+**For Production Use:**
+- **Sign up at:** [www.cadzero.xyz](https://www.cadzero.xyz/sign-up)
+- **Choose your plan** and enter real payment details
+- **Start designing** with AI immediately
+
+**For Testing New Features:**
 - **Sign up at:** [staging.cadzero.xyz](https://staging.cadzero.xyz/sign-up)
 - **Test payment card:** `4242 4242 4242 4242`
   - Any future expiry date (e.g., 12/34)
   - Any 3-digit CVC (e.g., 123)
   - Any ZIP code
-- **No real charges** - This is a test environment for QA purposes
+- **No real charges** - This is a test environment
 
 ## 🚀 Quick Start
 
@@ -92,11 +103,11 @@ git clone https://github.com/xchrisbradley/cadzero_addin.git
 1. The CADZERO palette will appear on the right side
 2. Click the **Sign In** button
 3. Your browser will open to the sign-in page
-4. **For Alpha Testing:**
-   - Sign up at [staging.cadzero.xyz](https://staging.cadzero.xyz)
-   - Use test card `4242 4242 4242 4242` for subscription
-   - Complete your profile
-5. Return to Fusion 360 - you're all set!
+4. **Choose your environment:**
+   - **Production:** Sign up at [www.cadzero.xyz](https://www.cadzero.xyz) for live use
+   - **Staging:** Sign up at [staging.cadzero.xyz](https://staging.cadzero.xyz) for testing
+5. Complete your profile and subscription
+6. Return to Fusion 360 - you're all set!
 
 ### 4️⃣ Start Creating
 
@@ -168,9 +179,9 @@ Add a 0.5cm fillet to all edges
 
 ### Authentication issues
 - Make sure you have an active internet connection
-- Verify your credentials at [staging.cadzero.xyz](https://staging.cadzero.xyz) *(alpha testing)*
+- Verify your credentials at [www.cadzero.xyz](https://www.cadzero.xyz) (production) or [staging.cadzero.xyz](https://staging.cadzero.xyz) (testing)
 - Click **Sign Out** then **Sign In** again to refresh your session
-- **Alpha testers:** Make sure you signed up at the staging environment
+- Make sure you're signing in to the correct environment (production or staging)
 
 ### Commands not working
 - Ensure you have an **active document** open in Fusion 360
@@ -186,12 +197,13 @@ Add a 0.5cm fillet to all edges
 
 ## 💡 Need Help?
 
-**🧪 Alpha Testing Support:**
+**🆘 Support:**
 - **📧 Email:** chris@nationdevs.com
 - **🐛 Report Bugs:** [GitHub Issues](https://github.com/xchrisbradley/nationdevs/issues)
-- **💬 Questions:** We respond quickly during alpha testing!
+- **💬 Questions:** We're here to help!
 
 **🌐 Resources:**
+- **Production Platform:** [www.cadzero.xyz](https://www.cadzero.xyz)
 - **Staging Platform:** [staging.cadzero.xyz](https://staging.cadzero.xyz)
 - **GitHub Repo:** [github.com/xchrisbradley/nationdevs](https://github.com/xchrisbradley/nationdevs)
 
@@ -226,16 +238,27 @@ CADZERO/
 └── lib/                    # Utilities
 ```
 
-### Local Development
-To run with local backend:
-1. Edit `config.py`:
-   ```python
-   current_endpoint = LOCAL_ENDPOINT
-   ```
-2. Start local Encore backend:
-   ```bash
-   cd utilities && encore run
-   ```
+### Environment Configuration
+The add-in can be configured to use different backends. Edit `config.py`:
+
+**For Production (default):**
+```python
+current_endpoint = PRODUCTION_ENDPOINT
+```
+
+**For Staging (testing):**
+```python
+current_endpoint = STAGING_ENDPOINT
+```
+
+**For Local Development:**
+```python
+current_endpoint = LOCAL_ENDPOINT
+```
+Then start local Encore backend:
+```bash
+cd utilities && encore run
+```
 
 ### Contributing
 Contributions welcome! Fork, create a feature branch, test thoroughly, and submit a PR.
