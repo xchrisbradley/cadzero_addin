@@ -23,10 +23,10 @@ sample_palette_id = f'{COMPANY_NAME}_{ADDIN_NAME}_palette_id'
 # Backend API Endpoints
 LOCAL_ENDPOINT = 'http://localhost:4000'
 STAGING_ENDPOINT = 'https://staging-utilities-c8p2.encr.app'
-PRODUCTION_ENDPOINT = 'https://production-utilities-c8p2.encr.app'
+PRODUCTION_ENDPOINT = 'https://prod-utilities-c8p2.encr.app'
 
 # Current endpoint (defaults to local)
-current_endpoint = STAGING_ENDPOINT
+current_endpoint = PRODUCTION_ENDPOINT
 
 # Clerk Authentication Configuration
 CLERK_PUBLISHABLE_KEY = 'pk_test_ZGlzdGluY3QtcGlyYW5oYS04My5jbGVyay5hY2NvdW50cy5kZXYk'  # Replace with your actual key
