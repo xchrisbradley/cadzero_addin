@@ -25,6 +25,7 @@ CADZERO is available in two environments:
 
 ## 🎬 Demo
 
+![CADZERO Demo5](./demo/cadzero-demo-5.gif)
 ![CADZERO Demo1](./demo/cadzero-demo-1.gif)
 ![CADZERO Demo2](./demo/cadzero-demo-2.gif)
 ![CADZERO Demo3](./demo/cadzero-demo-3.gif)
