@@ -58,9 +58,23 @@ ICON_FOLDER = os.path.join(os.path.dirname(os.path.abspath(__file__)), 'resource
 # they are not released and garbage collected.
 local_handlers = []
 
+# Custom event for executing Python code in the main thread
+CUSTOM_EVENT_ID = f'{config.COMPANY_NAME}_{config.ADDIN_NAME}_ExecutePythonCode'
+custom_event = None
+python_execution_results = {}
+python_execution_lock = threading.Lock()
+python_execution_counter = 0
+
 
 # Executed when add-in is run.
 def start():
+    global custom_event
+    
+    # Register custom event for executing Python code in main thread
+    custom_event = app.registerCustomEvent(CUSTOM_EVENT_ID)
+    futil.add_handler(custom_event, custom_event_handler)
+    futil.log(f'{CMD_NAME}: Registered custom event: {CUSTOM_EVENT_ID}')
+    
     # Create a command Definition.
     cmd_def = ui.commandDefinitions.addButtonDefinition(CMD_ID, CMD_NAME, CMD_Description, ICON_FOLDER)
 
@@ -83,6 +97,14 @@ def start():
 
 # Executed when add-in is stopped.
 def stop():
+    global custom_event
+    
+    # Unregister custom event
+    if custom_event:
+        app.unregisterCustomEvent(CUSTOM_EVENT_ID)
+        custom_event = None
+        futil.log(f'{CMD_NAME}: Unregistered custom event: {CUSTOM_EVENT_ID}')
+    
     # Get the various UI elements for this command
     workspace = ui.workspaces.itemById(WORKSPACE_ID)
     panel = workspace.toolbarPanels.itemById(PANEL_ID)
@@ -566,11 +588,87 @@ def create_cone(root, params):
         return f"Error creating cone: {str(e)}"
 
 
+def custom_event_handler(args: adsk.core.CustomEventArgs):
+    """Handle custom event to execute Python code in the main thread."""
+    global python_execution_results
+    
+    try:
+        # Parse the event data
+        event_data = json.loads(args.additionalInfo)
+        execution_id = event_data.get('execution_id')
+        python_code = event_data.get('python_code', '')
+        
+        futil.log(f'Custom event handler: Executing Python code (ID: {execution_id})', adsk.core.LogLevels.InfoLogLevel)
+        
+        if not python_code:
+            python_execution_results[execution_id] = {
+                'success': False,
+                'message': 'No Python code provided',
+                'error': None
+            }
+            return
+        
+        # Make sure a command isn't running before changes are made (per Fusion docs)
+        if ui.activeCommand != 'SelectCommand':
+            ui.commandDefinitions.itemById('SelectCommand').execute()
+        
+        # Prepare the execution environment
+        exec_globals = {
+            'adsk': adsk,
+            'app': app,
+            'ui': ui,
+            '__name__': '__main__',
+            '__cadzero_result__': None  # Variable to capture result from Python code
+        }
+        
+        # Execute the Python code in the main thread
+        exec(python_code, exec_globals)
+        
+        # Allow Fusion to process messages and update display
+        adsk.doEvents()
+        
+        # Capture result from Python code if it was set
+        captured_result = exec_globals.get('__cadzero_result__')
+        
+        # Mark as successful with captured result
+        python_execution_results[execution_id] = {
+            'success': True,
+            'message': 'Python code executed successfully',
+            'result': captured_result if captured_result is not None else 'Execution completed',
+            'error': None
+        }
+        
+        futil.log(f'Custom event handler: Python code executed successfully (ID: {execution_id})', adsk.core.LogLevels.InfoLogLevel)
+        
+    except Exception as e:
+        import traceback
+        error_details = traceback.format_exc()
+        futil.log(f'Custom event handler error: {error_details}', adsk.core.LogLevels.ErrorLogLevel)
+        
+        execution_id = None
+        try:
+            event_data = json.loads(args.additionalInfo)
+            execution_id = event_data.get('execution_id')
+        except:
+            pass
+        
+        if execution_id:
+            error_message = f'Error executing Python code: {str(e)}\n\nDetails:\n{error_details}'
+            python_execution_results[execution_id] = {
+                'success': False,
+                'message': error_message,
+                'result': error_message,  # Include error as result so it shows in chat
+                'error': error_details
+            }
+
+
 def execute_tool_calls_sequentially(tool_calls, tool_outputs):
-    """Execute tool calls sequentially in Fusion 360."""
+    """Execute tool calls sequentially in Fusion 360 using custom events."""
+    global python_execution_counter, python_execution_results
+    
     execution_results = []
     
-    futil.log(f'Executing {len(tool_calls)} tool calls sequentially', adsk.core.LogLevels.InfoLogLevel)
+    futil.log(f'Executing {len(tool_calls)} tool calls sequentially using custom events', adsk.core.LogLevels.InfoLogLevel)
     
     for i, (tool_call, tool_output) in enumerate(zip(tool_calls, tool_outputs)):
         try:
@@ -581,28 +679,81 @@ def execute_tool_calls_sequentially(tool_calls, tool_outputs):
             python_code = tool_output_data.get('python_code', '')
             
             if python_code:
-                futil.log(f'Found Python code for tool call {i+1}, executing...', adsk.core.LogLevels.InfoLogLevel)
+                futil.log(f'Found Python code for tool call {i+1}, executing via custom event...', adsk.core.LogLevels.InfoLogLevel)
                 
-                # Prepare the execution environment
-                exec_globals = {
-                    'adsk': adsk,
-                    'app': app,
-                    'ui': ui
+                # Generate unique execution ID
+                python_execution_counter += 1
+                execution_id = f'exec_{python_execution_counter}_{int(time.time())}'
+                
+                # Prepare event data
+                event_data = {
+                    'execution_id': execution_id,
+                    'python_code': python_code,
+                    'tool_name': tool_call.get('name', 'unknown')
                 }
                 
-                # Execute the Python code
-                exec(python_code, exec_globals)
+                # Initialize result slot
+                with python_execution_lock:
+                    python_execution_results[execution_id] = None
                 
-                # Get success message from tool output
-                success_message = tool_output_data.get('message', f'Tool {tool_call.get("name", "unknown")} executed successfully')
-                execution_results.append({
-                    'tool_name': tool_call.get('name', 'unknown'),
-                    'success': True,
-                    'message': success_message,
-                    'python_code': python_code
-                })
+                # Fire custom event to execute in main thread
+                app.fireCustomEvent(CUSTOM_EVENT_ID, json.dumps(event_data))
                 
-                futil.log(f'Tool call {i+1} executed successfully: {success_message}', adsk.core.LogLevels.InfoLogLevel)
+                # Wait for execution to complete (with timeout)
+                timeout = 30  # seconds
+                start_time = time.time()
+                result = None
+                
+                while time.time() - start_time < timeout:
+                    with python_execution_lock:
+                        result = python_execution_results.get(execution_id)
+                    
+                    if result is not None:
+                        break
+                    
+                    time.sleep(0.1)  # Small delay to avoid busy waiting
+                
+                # Clean up result
+                with python_execution_lock:
+                    if execution_id in python_execution_results:
+                        del python_execution_results[execution_id]
+                
+                if result is None:
+                    # Timeout
+                    futil.log(f'Tool call {i+1} execution timed out', adsk.core.LogLevels.ErrorLogLevel)
+                    execution_results.append({
+                        'tool_name': tool_call.get('name', 'unknown'),
+                        'success': False,
+                        'message': 'Execution timed out',
+                        'python_code': python_code
+                    })
+                elif result.get('success', False):
+                    # Success - include captured result if available
+                    captured_result = result.get('result')
+                    success_message = tool_output_data.get('message', result.get('message', f'Tool {tool_call.get("name", "unknown")} executed successfully'))
+                    
+                    # If we have a captured result, use it as the message
+                    if captured_result:
+                        success_message = captured_result
+                    
+                    execution_results.append({
+                        'tool_name': tool_call.get('name', 'unknown'),
+                        'success': True,
+                        'message': success_message,
+                        'result': captured_result,  # Include raw result
+                        'python_code': python_code
+                    })
+                    futil.log(f'Tool call {i+1} executed successfully: {success_message[:100]}...', adsk.core.LogLevels.InfoLogLevel)
+                else:
+                    # Error
+                    error_msg = result.get('message', 'Unknown error')
+                    execution_results.append({
+                        'tool_name': tool_call.get('name', 'unknown'),
+                        'success': False,
+                        'message': error_msg,
+                        'python_code': python_code
+                    })
+                    futil.log(f'Tool call {i+1} execution failed: {error_msg}', adsk.core.LogLevels.ErrorLogLevel)
                 
             else:
                 # No Python code, just log the tool output

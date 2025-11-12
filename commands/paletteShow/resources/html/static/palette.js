@@ -535,9 +535,42 @@ function displayChatResponse(response) {
         const elapsed = statusStartTime ? Math.floor((Date.now() - statusStartTime) / 1000) : null;
         updateStatusMessage('Complete', elapsed);
         
-        // Display tool execution results if available
+        // Extract and display component results as separate messages
         if (response.execution_results && response.execution_results.length > 0) {
+            // First, show tool execution checkmarks
             addToolExecutionResults(response.execution_results);
+            
+            // Then, extract and render component results as separate messages
+            // IMPORTANT: Add component results to conversation history BEFORE AI response
+            // so the LLM has context for follow-up questions
+            response.execution_results.forEach((result) => {
+                if (result.result) {
+                    try {
+                        const resultText = result.result;
+                        if (resultText.trim().startsWith('{')) {
+                            const componentData = JSON.parse(resultText);
+                            if (componentData && componentData.type) {
+                                // Render as separate component message (also adds to history)
+                                addComponentMessage(componentData);
+                            }
+                        } else {
+                            // Plain text result - add to history
+                            conversationHistory.push({
+                                role: 'assistant',
+                                content: resultText
+                            });
+                        }
+                    } catch (e) {
+                        // Not JSON, add as plain text to history
+                        if (result.result) {
+                            conversationHistory.push({
+                                role: 'assistant',
+                                content: result.result
+                            });
+                        }
+                    }
+                }
+            });
         }
         
         // Add the main AI response with action buttons
@@ -558,6 +591,222 @@ function displayChatResponse(response) {
         addMessage(`❌ Error: ${errorMsg}`, false);
         addDebugLog(`Error: ${errorMsg}`, 'executionLog');
     }
+}
+
+// Render component based on type
+function renderComponent(container, componentData) {
+    if (!componentData || !componentData.type) {
+        return;
+    }
+    
+    switch (componentData.type) {
+        case 'table':
+            renderTableComponent(container, componentData);
+            break;
+        case 'text':
+            renderTextComponent(container, componentData);
+            break;
+        default:
+            // Unknown component type, render as text
+            const textDiv = document.createElement('div');
+            textDiv.className = 'component-text';
+            textDiv.textContent = JSON.stringify(componentData);
+            container.appendChild(textDiv);
+    }
+}
+
+// Render table component
+function renderTableComponent(container, componentData) {
+    const tableWrapper = document.createElement('div');
+    tableWrapper.className = 'component-table-wrapper';
+    
+    // Add title if provided
+    if (componentData.title) {
+        const title = document.createElement('div');
+        title.className = 'component-table-title';
+        title.textContent = componentData.title;
+        tableWrapper.appendChild(title);
+    }
+    
+    // Create table
+    const table = document.createElement('table');
+    table.className = 'component-table';
+    
+    // Create header
+    const thead = document.createElement('thead');
+    const headerRow = document.createElement('tr');
+    
+    if (componentData.columns && componentData.columns.length > 0) {
+        componentData.columns.forEach(column => {
+            const th = document.createElement('th');
+            th.textContent = column.label || column.key;
+            if (column.width) {
+                th.style.width = column.width;
+            }
+            headerRow.appendChild(th);
+        });
+    } else {
+        // Auto-generate columns from first row
+        if (componentData.data && componentData.data.length > 0) {
+            Object.keys(componentData.data[0]).forEach(key => {
+                const th = document.createElement('th');
+                th.textContent = key.charAt(0).toUpperCase() + key.slice(1).replace(/_/g, ' ');
+                headerRow.appendChild(th);
+            });
+        }
+    }
+    
+    thead.appendChild(headerRow);
+    table.appendChild(thead);
+    
+    // Create body
+    const tbody = document.createElement('tbody');
+    if (componentData.data && componentData.data.length > 0) {
+        componentData.data.forEach((row, index) => {
+            const tr = document.createElement('tr');
+            tr.className = index % 2 === 0 ? 'even' : 'odd';
+            
+            // Use columns if provided, otherwise use all keys from row
+            const keys = componentData.columns ? 
+                componentData.columns.map(col => col.key) : 
+                Object.keys(row);
+            
+            keys.forEach(key => {
+                const td = document.createElement('td');
+                const value = row[key];
+                td.textContent = value !== undefined && value !== null ? String(value) : '-';
+                td.className = `col-${key}`;
+                tr.appendChild(td);
+            });
+            
+            tbody.appendChild(tr);
+        });
+    } else {
+        const tr = document.createElement('tr');
+        const td = document.createElement('td');
+        td.colSpan = componentData.columns ? componentData.columns.length : 1;
+        td.textContent = 'No data available';
+        td.className = 'no-data';
+        tr.appendChild(td);
+        tbody.appendChild(tr);
+    }
+    
+    table.appendChild(tbody);
+    tableWrapper.appendChild(table);
+    
+    // Add summary if provided
+    if (componentData.summary) {
+        const summary = document.createElement('div');
+        summary.className = 'component-table-summary';
+        summary.textContent = componentData.summary;
+        tableWrapper.appendChild(summary);
+    }
+    
+    container.appendChild(tableWrapper);
+}
+
+// Render text component
+function renderTextComponent(container, componentData) {
+    const textDiv = document.createElement('div');
+    textDiv.className = 'component-text';
+    textDiv.textContent = componentData.content || '';
+    container.appendChild(textDiv);
+}
+
+// Convert component data to text format for LLM context
+function componentDataToText(componentData) {
+    if (!componentData || !componentData.type) {
+        return '';
+    }
+    
+    switch (componentData.type) {
+        case 'table':
+            let text = componentData.title ? `${componentData.title}\n\n` : '';
+            
+            if (componentData.columns && componentData.columns.length > 0) {
+                // Build header
+                const headers = componentData.columns.map(col => col.label || col.key).join(' | ');
+                text += headers + '\n';
+                text += componentData.columns.map(() => '---').join(' | ') + '\n';
+                
+                // Build rows
+                if (componentData.data && componentData.data.length > 0) {
+                    componentData.data.forEach((row) => {
+                        const values = componentData.columns.map(col => {
+                            const value = row[col.key];
+                            return value !== undefined && value !== null ? String(value) : '-';
+                        }).join(' | ');
+                        text += values + '\n';
+                    });
+                }
+            } else if (componentData.data && componentData.data.length > 0) {
+                // Auto-generate from data
+                const keys = Object.keys(componentData.data[0]);
+                const headers = keys.map(k => k.charAt(0).toUpperCase() + k.slice(1).replace(/_/g, ' ')).join(' | ');
+                text += headers + '\n';
+                text += keys.map(() => '---').join(' | ') + '\n';
+                
+                componentData.data.forEach((row) => {
+                    const values = keys.map(key => {
+                        const value = row[key];
+                        return value !== undefined && value !== null ? String(value) : '-';
+                    }).join(' | ');
+                    text += values + '\n';
+                });
+            }
+            
+            if (componentData.summary) {
+                text += `\n${componentData.summary}`;
+            }
+            
+            return text;
+            
+        case 'text':
+            return componentData.content || '';
+            
+        default:
+            return JSON.stringify(componentData);
+    }
+}
+
+// Add component as a separate chat message
+function addComponentMessage(componentData) {
+    const chatMessages = document.getElementById('chatMessages');
+    const contentArea = document.getElementById('contentArea');
+    
+    // Create message div (assistant message)
+    const messageDiv = document.createElement('div');
+    messageDiv.className = 'message assistant component-message';
+    
+    const messageContent = document.createElement('div');
+    messageContent.className = 'message-content';
+    
+    // Create container for component
+    const componentContainer = document.createElement('div');
+    componentContainer.className = 'component-container';
+    renderComponent(componentContainer, componentData);
+    
+    messageContent.appendChild(componentContainer);
+    
+    // Add timestamp
+    const messageTime = document.createElement('div');
+    messageTime.className = 'message-time';
+    messageTime.textContent = new Date().toLocaleTimeString();
+    messageContent.appendChild(messageTime);
+    
+    messageDiv.appendChild(messageContent);
+    chatMessages.appendChild(messageDiv);
+    
+    // Add component data to conversation history as assistant message
+    const componentText = componentDataToText(componentData);
+    if (componentText) {
+        conversationHistory.push({
+            role: 'assistant',
+            content: componentText
+        });
+    }
+    
+    scrollToBottom(contentArea);
 }
 
 // Add tool execution results with modern checkmark design
@@ -581,11 +830,13 @@ function addToolExecutionResults(executionResults) {
         const toolInfo = document.createElement('div');
         toolInfo.className = 'tool-info';
         
+        // Show tool name and simple status (components are rendered separately)
         const toolName = document.createElement('div');
         toolName.className = 'tool-name';
-        // Display message if available, otherwise tool name
-        toolName.textContent = result.message || result.tool_name;
-        
+        const statusText = result.success ? 
+            `${result.tool_name || 'Tool'} executed successfully` : 
+            `${result.tool_name || 'Tool'} failed`;
+        toolName.textContent = statusText;
         toolInfo.appendChild(toolName);
         
         const checkmark = document.createElement('div');
@@ -598,7 +849,7 @@ function addToolExecutionResults(executionResults) {
         toolItem.appendChild(checkmark);
         toolsList.appendChild(toolItem);
         
-        addDebugLog(`${result.success ? '✅' : '❌'} ${result.tool_name}: ${result.message}`, 'executionLog');
+        addDebugLog(`${result.success ? '✅' : '❌'} ${result.tool_name}: ${result.result || result.message}`, 'executionLog');
     });
     
     messageContent.appendChild(toolsList);

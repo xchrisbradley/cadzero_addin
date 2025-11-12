@@ -736,6 +736,15 @@
             padding: 12px 14px;
         }
 
+        .message.component-message .message-content {
+            background: transparent;
+            padding: 0;
+        }
+
+        .message.component-message .component-container {
+            margin-top: 0;
+        }
+
         .tools-list {
             display: flex;
             flex-direction: column;
@@ -777,6 +786,115 @@
             white-space: nowrap;
             overflow: hidden;
             text-overflow: ellipsis;
+        }
+
+        .tool-name-header {
+            font-size: 11px;
+            font-weight: 500;
+            color: var(--color-text-primary);
+            line-height: 1.4;
+            margin-bottom: 4px;
+        }
+
+        .tool-result {
+            font-size: 11px;
+            color: var(--color-text-primary);
+            line-height: 1.6;
+            white-space: pre-wrap;
+            word-wrap: break-word;
+            margin-top: 6px;
+            padding: 8px;
+            background: var(--color-bg-tertiary);
+            border-radius: 4px;
+            max-height: 400px;
+            overflow-y: auto;
+        }
+
+        /* Component Container */
+        .component-container {
+            margin-top: 8px;
+            width: 100%;
+        }
+
+        /* Table Component Styles */
+        .component-table-wrapper {
+            margin-top: 8px;
+            background: var(--color-bg-tertiary);
+            border-radius: 6px;
+            overflow: hidden;
+            border: 1px solid var(--color-border);
+        }
+
+        .component-table-title {
+            font-size: 12px;
+            font-weight: 600;
+            color: var(--color-text-primary);
+            padding: 10px 12px;
+            background: var(--color-bg-secondary);
+            border-bottom: 1px solid var(--color-border);
+        }
+
+        .component-table {
+            width: 100%;
+            border-collapse: collapse;
+            font-size: 11px;
+            color: var(--color-text-primary);
+        }
+
+        .component-table thead {
+            background: var(--color-bg-secondary);
+        }
+
+        .component-table th {
+            padding: 8px 12px;
+            text-align: left;
+            font-weight: 600;
+            color: var(--color-text-primary);
+            border-bottom: 2px solid var(--color-border);
+            white-space: nowrap;
+        }
+
+        .component-table td {
+            padding: 8px 12px;
+            border-bottom: 1px solid var(--color-border);
+            color: var(--color-text-secondary);
+        }
+
+        .component-table tbody tr.even {
+            background: var(--color-bg-tertiary);
+        }
+
+        .component-table tbody tr.odd {
+            background: rgba(255, 255, 255, 0.02);
+        }
+
+        .component-table tbody tr:hover {
+            background: rgba(96, 165, 250, 0.1);
+        }
+
+        .component-table td.no-data {
+            text-align: center;
+            color: var(--color-text-muted);
+            font-style: italic;
+            padding: 16px;
+        }
+
+        .component-table-summary {
+            font-size: 10px;
+            color: var(--color-text-secondary);
+            padding: 8px 12px;
+            background: var(--color-bg-secondary);
+            border-top: 1px solid var(--color-border);
+            text-align: right;
+        }
+
+        /* Text Component Styles */
+        .component-text {
+            font-size: 11px;
+            color: var(--color-text-primary);
+            line-height: 1.6;
+            padding: 8px;
+            margin-top: 6px;
         }
 
         .tool-message {
