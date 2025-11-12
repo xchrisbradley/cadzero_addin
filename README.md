@@ -1,7 +1,7 @@
 # CADZERO - AI-Powered CAD Assistant for Fusion 360
 
-> **🚀 LIVE NOW**  
-> CADZERO is now available for production use! Sign up at [www.cadzero.xyz](https://www.cadzero.xyz) and start designing with AI.
+> **⚠️ PRODUCTION IN QA**  
+> Production is currently in QA testing. For the most recent features and updates, please use **Staging** by updating your configuration (see instructions below).
 
 Transform your Fusion 360 experience with AI. CADZERO brings intelligent CAD assistance directly into your modeling workflow - just describe what you want to create and watch it come to life. No coding required, no technical setup, just install and start designing.
 
@@ -9,17 +9,23 @@ Transform your Fusion 360 experience with AI. CADZERO brings intelligent CAD ass
 
 CADZERO is available in two environments:
 
-**Production (Live):**
+**Production (QA Testing):**
+- ⚠️ Currently in QA - features may be limited
 - 🌐 Sign up at [www.cadzero.xyz](https://www.cadzero.xyz)
 - 💳 Real subscriptions and billing
-- ⚡ Stable, production-ready features
 - 🔒 Secure and reliable
 
-**Staging (Testing):**
+**Staging (Recommended for Latest Features):**
+- 🚀 **Recommended** - Get the most recent features and updates
 - 🧪 Test environment at [staging.cadzero.xyz](https://staging.cadzero.xyz)
 - 🎫 Use test card: `4242 4242 4242 4242`
 - 🐛 Help us test new features
 - 💬 Direct developer support
+
+**To use Staging (recommended):** Edit `config.py` in the CADZERO folder:
+1. Change `current_endpoint = PRODUCTION_ENDPOINT` to `current_endpoint = STAGING_ENDPOINT`
+2. Change `CLERK_PUBLISHABLE_KEY` to the staging key (uncomment the staging key line)
+3. Restart Fusion 360 and the add-in
 
 **Your feedback matters!** Report bugs, suggest features, and help us make CADZERO amazing.
 
@@ -62,18 +68,22 @@ That's it! The add-in connects to our cloud service automatically. **No coding, 
 
 ### 🎫 Getting Started
 
-**For Production Use:**
-- **Sign up at:** [www.cadzero.xyz](https://www.cadzero.xyz/sign-up)
-- **Choose your plan** and enter real payment details
-- **Start designing** with AI immediately
+**⚠️ Important:** Production is currently in QA. For the latest features, use Staging (see configuration steps above).
 
-**For Testing New Features:**
+**For Latest Features (Recommended - Staging):**
+- **Configure:** Update `config.py` to use `STAGING_ENDPOINT` and staging Clerk key (see step 3️⃣ above)
 - **Sign up at:** [staging.cadzero.xyz](https://staging.cadzero.xyz/sign-up)
 - **Test payment card:** `4242 4242 4242 4242`
   - Any future expiry date (e.g., 12/34)
   - Any 3-digit CVC (e.g., 123)
   - Any ZIP code
 - **No real charges** - This is a test environment
+- **Get latest features** and updates
+
+**For Production (QA Testing):**
+- **Sign up at:** [www.cadzero.xyz](https://www.cadzero.xyz/sign-up)
+- **Choose your plan** and enter real payment details
+- **Note:** Currently in QA - features may be limited
 
 ## 🚀 Quick Start
 
@@ -99,18 +109,35 @@ git clone https://github.com/xchrisbradley/cadzero_addin.git
 7. Click **OK**
 8. Find **CADZERO** in the list and click **Run**
 
-### 3️⃣ Sign In
+### 3️⃣ Configure Environment (Recommended: Staging)
+
+**⚠️ Important:** Production is currently in QA. For the latest features, use Staging:
+
+1. Open the `config.py` file in the CADZERO folder
+2. Update the endpoint:
+   ```python
+   current_endpoint = STAGING_ENDPOINT  # Change from PRODUCTION_ENDPOINT
+   ```
+3. Update the Clerk key:
+   ```python
+   CLERK_PUBLISHABLE_KEY = 'pk_test_ZGlzdGluY3QtcGlyYW5oYS04My5jbGVyay5hY2NvdW50cy5kZXYk'  # Uncomment this line
+   ```
+   (Comment out or remove the production key line)
+4. Save the file
+5. Restart Fusion 360
+
+### 4️⃣ Sign In
 
 1. The CADZERO palette will appear on the right side
 2. Click the **Sign In** button
 3. Your browser will open to the sign-in page
 4. **Choose your environment:**
-   - **Production:** Sign up at [www.cadzero.xyz](https://www.cadzero.xyz) for live use
-   - **Staging:** Sign up at [staging.cadzero.xyz](https://staging.cadzero.xyz) for testing
+   - **Staging (Recommended):** Sign up at [staging.cadzero.xyz](https://staging.cadzero.xyz) for latest features
+   - **Production (QA):** Sign up at [www.cadzero.xyz](https://www.cadzero.xyz) - currently in QA
 5. Complete your profile and subscription
 6. Return to Fusion 360 - you're all set!
 
-### 4️⃣ Start Creating
+### 5️⃣ Start Creating
 
 Type your first command in the chat:
 ```
@@ -242,19 +269,24 @@ CADZERO/
 ### Environment Configuration
 The add-in can be configured to use different backends. Edit `config.py`:
 
-**For Production (default):**
-```python
-current_endpoint = PRODUCTION_ENDPOINT
-```
+**⚠️ Note:** Production is currently in QA. Use Staging for the latest features.
 
-**For Staging (testing):**
+**For Staging (Recommended - Latest Features):**
 ```python
 current_endpoint = STAGING_ENDPOINT
+CLERK_PUBLISHABLE_KEY = 'pk_test_ZGlzdGluY3QtcGlyYW5oYS04My5jbGVyay5hY2NvdW50cy5kZXYk'
+```
+
+**For Production (QA Testing):**
+```python
+current_endpoint = PRODUCTION_ENDPOINT
+CLERK_PUBLISHABLE_KEY = 'pk_live_Y2xlcmsuY2FkemVyby54eXok'
 ```
 
 **For Local Development:**
 ```python
 current_endpoint = LOCAL_ENDPOINT
+CLERK_PUBLISHABLE_KEY = 'pk_test_ZGlzdGluY3QtcGlyYW5oYS04My5jbGVyay5hY2NvdW50cy5kZXYk'  # Or your local key
 ```
 Then start local Encore backend:
 ```bash

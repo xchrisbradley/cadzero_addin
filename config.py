@@ -29,6 +29,7 @@ PRODUCTION_ENDPOINT = 'https://prod-utilities-c8p2.encr.app'
 current_endpoint = PRODUCTION_ENDPOINT
 
 # Clerk Authentication Configuration
+# CLERK_PUBLISHABLE_KEY = 'pk_test_ZGlzdGluY3QtcGlyYW5oYS04My5jbGVyay5hY2NvdW50cy5kZXYk'  # Replace with your actual key
 CLERK_PUBLISHABLE_KEY = 'pk_live_Y2xlcmsuY2FkemVyby54eXok'  # Replace with your actual key
 CLERK_SIGN_IN_URL_LOCAL = 'http://localhost:5173/sign-in'  # Your local frontend sign-in URL
 CLERK_SIGN_IN_URL_STAGING = 'https://staging.cadzero.xyz/sign-in'  # Staging frontend sign-in URL
